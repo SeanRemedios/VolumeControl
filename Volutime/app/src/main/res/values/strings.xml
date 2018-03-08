@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Volutime</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="progress">0%</string>
+    <string name="deci">0db</string>
+</resources>
