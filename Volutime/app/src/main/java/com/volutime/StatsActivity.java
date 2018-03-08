@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-public class ProfileActivity extends AppCompatActivity  {
+public class StatsActivity extends AppCompatActivity  {
 
     private TextView mTextMessage;
     Toolbar topToolBar;
@@ -26,6 +26,8 @@ public class ProfileActivity extends AppCompatActivity  {
             switch (item.getItemId()) {
                 case R.id.navigation_profile:
                     mTextMessage.setText("Profile");
+                    launchProfileActivity();
+                    finish();
                     return true;
                 case R.id.navigation_time:
                     mTextMessage.setText("Time");
@@ -34,8 +36,6 @@ public class ProfileActivity extends AppCompatActivity  {
                     return true;
                 case R.id.navigation_stats:
                     mTextMessage.setText("Statistics");
-                    launchStatsActivity();
-                    finish();
                     return true;
             }
             return false;
@@ -47,9 +47,8 @@ public class ProfileActivity extends AppCompatActivity  {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
-    private void launchStatsActivity() {
-
-        Intent intent = new Intent(this, StatsActivity.class);
+    private void launchProfileActivity() {
+        Intent intent = new Intent(this, ProfileActivity.class);
         startActivity(intent);
     }
     private void launchSettingsActivity() {
@@ -57,17 +56,16 @@ public class ProfileActivity extends AppCompatActivity  {
         startActivity(intent);
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
+        setContentView(R.layout.activity_statistics);
 
         settingsButton = (ImageButton) findViewById(R.id.settings_button);
 
         mTextMessage = (TextView) findViewById(R.id.message);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
-        navigation.setSelectedItemId(R.id.navigation_profile);
+        navigation.setSelectedItemId(R.id.navigation_stats);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         topToolBar = (Toolbar) findViewById(R.id.toolbar);
