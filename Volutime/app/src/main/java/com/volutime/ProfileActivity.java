@@ -29,12 +29,12 @@ public class ProfileActivity extends AppCompatActivity  {
                     return true;
                 case R.id.navigation_time:
                     mTextMessage.setText("Time");
-                    launchMainActivity();
+                    launchActivity(MainActivity.class);
                     finish();
                     return true;
                 case R.id.navigation_stats:
                     mTextMessage.setText("Statistics");
-                    launchStatsActivity();
+                    launchActivity(StatsActivity.class);
                     finish();
                     return true;
             }
@@ -42,18 +42,9 @@ public class ProfileActivity extends AppCompatActivity  {
         }
     };
 
-    private void launchMainActivity() {
-
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-    }
-    private void launchStatsActivity() {
-
-        Intent intent = new Intent(this, StatsActivity.class);
-        startActivity(intent);
-    }
-    private void launchSettingsActivity() {
-        Intent intent = new Intent(this, SettingsActivity.class);
+    // Activity intents to start new activity based on intent
+    private void launchActivity(Class cl) {
+        Intent intent = new Intent(this, cl);
         startActivity(intent);
     }
 
@@ -78,7 +69,7 @@ public class ProfileActivity extends AppCompatActivity  {
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                launchSettingsActivity();
+                launchActivity(SettingsActivity.class);
                 finish();
             }
         });

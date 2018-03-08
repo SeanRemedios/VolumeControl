@@ -26,12 +26,12 @@ public class StatsActivity extends AppCompatActivity  {
             switch (item.getItemId()) {
                 case R.id.navigation_profile:
                     mTextMessage.setText("Profile");
-                    launchProfileActivity();
+                    launchActivity(ProfileActivity.class);
                     finish();
                     return true;
                 case R.id.navigation_time:
                     mTextMessage.setText("Time");
-                    launchMainActivity();
+                    launchActivity(MainActivity.class);
                     finish();
                     return true;
                 case R.id.navigation_stats:
@@ -42,17 +42,9 @@ public class StatsActivity extends AppCompatActivity  {
         }
     };
 
-    private void launchMainActivity() {
-
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-    }
-    private void launchProfileActivity() {
-        Intent intent = new Intent(this, ProfileActivity.class);
-        startActivity(intent);
-    }
-    private void launchSettingsActivity() {
-        Intent intent = new Intent(this, SettingsActivity.class);
+    // Activity intents to start new activity based on intent
+    private void launchActivity(Class cl) {
+        Intent intent = new Intent(this, cl);
         startActivity(intent);
     }
 
@@ -64,7 +56,7 @@ public class StatsActivity extends AppCompatActivity  {
         settingsButton = (ImageButton) findViewById(R.id.settings_button);
 
         mTextMessage = (TextView) findViewById(R.id.message);
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        final BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setSelectedItemId(R.id.navigation_stats);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
@@ -73,10 +65,12 @@ public class StatsActivity extends AppCompatActivity  {
         ActionBar actionBar = getSupportActionBar();;
         actionBar.setDisplayHomeAsUpEnabled(true);
 
+        navigation.setActivated(false);
+
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                launchSettingsActivity();
+                launchActivity(SettingsActivity.class);
                 finish();
             }
         });

@@ -8,7 +8,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -24,15 +23,15 @@ public class SettingsActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_profile:
-                    launchProfileActivity();
+                    launchActivity(ProfileActivity.class);
                     finish();
                     return true;
                 case R.id.navigation_time:
-                    launchMainActivity();
+                    launchActivity(MainActivity.class);
                     finish();
                     return true;
                 case R.id.navigation_stats:
-                    launchStatsActivity();
+                    launchActivity(StatsActivity.class);
                     finish();
                     return true;
             }
@@ -40,22 +39,9 @@ public class SettingsActivity extends AppCompatActivity {
         }
     };
 
-    private void launchMainActivity() {
-
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-    }
-    private void launchProfileActivity() {
-        Intent intent = new Intent(this, ProfileActivity.class);
-        startActivity(intent);
-    }
-    private void launchStatsActivity() {
-
-        Intent intent = new Intent(this, StatsActivity.class);
-        startActivity(intent);
-    }
-    private void launchSettingsActivity() {
-        Intent intent = new Intent(this, SettingsActivity.class);
+    // Activity intents to start new activity based on intent
+    private void launchActivity(Class cl) {
+        Intent intent = new Intent(this, cl);
         startActivity(intent);
     }
 
@@ -78,15 +64,8 @@ public class SettingsActivity extends AppCompatActivity {
 
         mTextMessage.setText("Settings");
 
-        navigation.setSelectedItemId(R.id.navigation_stats);
+        navigation.setSelected(false);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        settingsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                launchSettingsActivity();
-                finish();
-            }
-        });
     }
 }

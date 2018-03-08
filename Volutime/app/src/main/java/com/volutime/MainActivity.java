@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView mTextMessage;
     private TextView textViewvolumeProgress;
-    private TextView textViewvolumeDeci;
+//    private TextView textViewvolumeDeci;
     private TextView textViewProgress;
     private SeekBar seekBar;
     private CircularSeekBar Cseekbar;
@@ -29,40 +29,38 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton settingsButton;
 
 
+    // Bottom Navigation view listener
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
+        // When an item is selected (called from onCreate) it calls this function
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
+                // Tab on the left
                 case R.id.navigation_profile:
                     mTextMessage.setText("Profile");
-                    launchProfileActivity();
-                    finish();
+                    launchActivity(ProfileActivity.class); // Launch the tab's activity
+                    finish(); // Stop this activity
                     return true;
-                case R.id.navigation_time:
+                // Tab in the middle
+                case R.id.navigation_time: // This is current, do nothing
                     mTextMessage.setText("Time");
                     return true;
+                // Tab on the right
                 case R.id.navigation_stats:
                     mTextMessage.setText("Statistics");
-                    launchStatsActivity();
-                    finish();
+                    launchActivity(StatsActivity.class); // Launch the tab's activity
+                    finish(); // Stop this activity
                     return true;
             }
-            return false;
+            return false; // If we didn't find a case, WTF
         }
     };
 
-    private void launchProfileActivity() {
-        Intent intent = new Intent(this, ProfileActivity.class);
-        startActivity(intent);
-    }
-    private void launchStatsActivity() {
-        Intent intent = new Intent(this, StatsActivity.class);
-        startActivity(intent);
-    }
-    private void launchSettingsActivity() {
-        Intent intent = new Intent(this, SettingsActivity.class);
+    // Activity intents to start new activity based on intent
+    private void launchActivity(Class cl) {
+        Intent intent = new Intent(this, cl);
         startActivity(intent);
     }
 
@@ -72,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         textViewvolumeProgress = (TextView) findViewById(R.id.volumeProgress);
-        textViewvolumeDeci = (TextView) findViewById(R.id.volumeDeci);
+//        textViewvolumeDeci = (TextView) findViewById(R.id.volumeDeci);
         textViewProgress = (TextView) findViewById(R.id.textViewProgress);
         seekBar = (SeekBar) findViewById(R.id.seekBar);
         seekBar.getIndeterminateDrawable().setColorFilter(0x32CD32,android.graphics.PorterDuff.Mode.MULTIPLY);
@@ -84,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         navigation.setSelectedItemId(R.id.navigation_time);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        Cseekbar.setProgress(50);
+        Cseekbar.setProgress(0);
         int CProgress = Cseekbar.getProgress();
         textViewProgress.setText("" + CProgress + "%");
 
@@ -119,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                launchSettingsActivity();
+                launchActivity(SettingsActivity.class);
                 finish();
             }
         });
@@ -128,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(CircularSeekBar circularSeekBar, int progress, boolean fromUser) {
                 Cseekbar.setProgress(progress);
+                seekBar.setProgress(progress,true);
                 textViewProgress.setText("" + progress + "%");
                 if (progress > 75) {
                     int redColorValue = Color.parseColor("#FF3030");
@@ -150,8 +149,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
                 seekBar.setProgress(progress);
+                Cseekbar.setProgress(progress);
                 textViewvolumeProgress.setText(""+ progress + "%");
-                textViewvolumeDeci.setText("" + (progress * 0.5) + "db" );
+               // textViewvolumeDeci.setText("" + (progress * 0.5) + "db" );
                 if (progress > 75) {
                     seekBar.setProgressTintList(cslAbove);
                     seekBar.setThumbTintList(cslAbove);
