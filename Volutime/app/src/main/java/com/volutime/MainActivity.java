@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private CircularSeekBar Cseekbar;
     private Toolbar topToolBar;
     private ImageButton settingsButton;
+    private BottomNavigationView navigation;
 
     // These are our color state lists for the seekbar
     private ColorStateList cslAbove;
@@ -153,20 +154,46 @@ public class MainActivity extends AppCompatActivity {
 
         // See states for order
         int[] colorsBelow = new int[] {
-                Color.GREEN,
+                ContextCompat.getColor(getBaseContext(),
+                        R.color.colorProgress),
                 Color.WHITE,
                 Color.WHITE,
                 Color.WHITE
         };
         int[] colorsAbove = new int[] {
-                Color.RED,
+                ContextCompat.getColor(getBaseContext(),
+                        R.color.colorRed),
                 Color.WHITE,
                 Color.WHITE,
                 Color.WHITE
         };
 
+        int[] colorsNavOn = new int[] {
+                ContextCompat.getColor(getBaseContext(),
+                        R.color.colorChecked),
+                Color.WHITE,
+                ContextCompat.getColor(getBaseContext(),
+                        R.color.colorUnChecked),
+                ContextCompat.getColor(getBaseContext(),
+                        R.color.colorChecked)
+        };
+        int[] colorsNavOff = new int[] {
+                ContextCompat.getColor(getBaseContext(),
+                        R.color.colorUnChecked),
+                Color.WHITE,
+                ContextCompat.getColor(getBaseContext(),
+                        R.color.colorUnChecked),
+                ContextCompat.getColor(getBaseContext(),
+                        R.color.colorUnChecked)
+        };
+
+
         cslAbove = new ColorStateList(states, colorsAbove);
         cslBelow = new ColorStateList(states, colorsBelow);
+    }
+
+    private void setNavColor(ColorStateList csl) {
+        navigation.setItemIconTintList(csl);
     }
 
 
@@ -182,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
         Cseekbar = (CircularSeekBar) findViewById(R.id.circularSeekBar1);
         settingsButton = (ImageButton) findViewById(R.id.settings_button);
         mTextMessage = (TextView) findViewById(R.id.message);
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        navigation = (BottomNavigationView) findViewById(R.id.navigation);
         topToolBar = (Toolbar) findViewById(R.id.toolbar);
 
         // Set up the color state lists

@@ -17,6 +17,7 @@ public class ProfileActivity extends AppCompatActivity  {
     private TextView mTextMessage;
     Toolbar topToolBar;
     private ImageButton settingsButton;
+    BottomNavigationView navigation;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -48,6 +49,19 @@ public class ProfileActivity extends AppCompatActivity  {
         startActivity(intent);
     }
 
+    private void navigationStuff() {
+        navigation.setSelectedItemId(R.id.navigation_profile);
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+    }
+
+    private void toolbarStuff() {
+        // Top toolbar
+        setSupportActionBar(topToolBar);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,14 +71,12 @@ public class ProfileActivity extends AppCompatActivity  {
         settingsButton = (ImageButton) findViewById(R.id.settings_button);
 
         mTextMessage = (TextView) findViewById(R.id.message);
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
-        navigation.setSelectedItemId(R.id.navigation_profile);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        navigation = (BottomNavigationView) findViewById(R.id.navigation);
 
         topToolBar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(topToolBar);
-        ActionBar actionBar = getSupportActionBar();;
-        actionBar.setDisplayHomeAsUpEnabled(true);
+
+        toolbarStuff();
+        navigationStuff();
 
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
