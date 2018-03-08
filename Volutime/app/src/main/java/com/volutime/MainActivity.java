@@ -18,6 +18,10 @@ import android.widget.TextView;
 
 import com.devadvance.circularseekbar.CircularSeekBar;
 
+import java.util.concurrent.Semaphore;
+
+import static java.lang.Thread.sleep;
+
 public class MainActivity extends AppCompatActivity {
 
     // Declare the activity components for later
@@ -28,15 +32,30 @@ public class MainActivity extends AppCompatActivity {
     private CircularSeekBar Cseekbar;
     private Toolbar topToolBar;
     private ImageButton settingsButton;
+    private ImageButton musicButton;
     private BottomNavigationView navigation;
 
     // These are our color state lists for the seekbar
     private ColorStateList cslAbove;
     private ColorStateList cslBelow;
 
-    // The lock that ties the two seek bars together
-    public boolean seekbar_lock = true; // true = locked
+    private boolean music_state = false; // For button use only not the session active counter
 
+    Session sessionThread;
+
+    // This is for our thread stuff to make sure they don't get created again later
+    public MainActivity() {
+        // Declaring Mutex and Semaphores for threads
+        Synch.mutex_session_active = new Semaphore(1, true);
+        Synch.mutex_seekbar_lock = new Semaphore(1, true);
+        Synch.session = new Semaphore(0, true);
+
+        // Start the session thread
+        sessionThread = new Session(this);
+        sessionThread.start();
+        Thread sessionupdatethread = new Thread(SessionUpdate);
+        sessionupdatethread.start();
+    }
 
     // Bottom Navigation view listener
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -50,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.navigation_profile:
                     mTextMessage.setText("Profile");
                     launchActivity(ProfileActivity.class); // Launch the tab's activity
-                    finish(); // Stop this activity
                     return true;
                 // Tab in the middle
                 case R.id.navigation_time: // This is current, do nothing
@@ -60,7 +78,6 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.navigation_stats:
                     mTextMessage.setText("Statistics");
                     launchActivity(StatsActivity.class); // Launch the tab's activity
-                    finish(); // Stop this activity
                     return true;
             }
             return false; // If we didn't find a case, WTF
@@ -168,34 +185,9 @@ public class MainActivity extends AppCompatActivity {
                 Color.WHITE
         };
 
-        int[] colorsNavOn = new int[] {
-                ContextCompat.getColor(getBaseContext(),
-                        R.color.colorChecked),
-                Color.WHITE,
-                ContextCompat.getColor(getBaseContext(),
-                        R.color.colorUnChecked),
-                ContextCompat.getColor(getBaseContext(),
-                        R.color.colorChecked)
-        };
-        int[] colorsNavOff = new int[] {
-                ContextCompat.getColor(getBaseContext(),
-                        R.color.colorUnChecked),
-                Color.WHITE,
-                ContextCompat.getColor(getBaseContext(),
-                        R.color.colorUnChecked),
-                ContextCompat.getColor(getBaseContext(),
-                        R.color.colorUnChecked)
-        };
-
-
         cslAbove = new ColorStateList(states, colorsAbove);
         cslBelow = new ColorStateList(states, colorsBelow);
     }
-
-    private void setNavColor(ColorStateList csl) {
-        navigation.setItemIconTintList(csl);
-    }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -203,14 +195,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Get all IDs from activity
-        textViewvolumeProgress = (TextView) findViewById(R.id.volumeProgress);
-        textViewProgress = (TextView) findViewById(R.id.textViewProgress);
-        seekBar = (SeekBar) findViewById(R.id.seekBar);
-        Cseekbar = (CircularSeekBar) findViewById(R.id.circularSeekBar1);
-        settingsButton = (ImageButton) findViewById(R.id.settings_button);
-        mTextMessage = (TextView) findViewById(R.id.message);
-        navigation = (BottomNavigationView) findViewById(R.id.navigation);
-        topToolBar = (Toolbar) findViewById(R.id.toolbar);
+        // Don't need to cast, just do it for info
+        textViewvolumeProgress  = (TextView) findViewById(R.id.volumeProgress);
+        textViewProgress        = (TextView) findViewById(R.id.textViewProgress);
+        seekBar                 = (SeekBar) findViewById(R.id.seekBar);
+        Cseekbar                = (CircularSeekBar) findViewById(R.id.circularSeekBar1);
+        settingsButton          = (ImageButton) findViewById(R.id.settings_button);
+        musicButton             = (ImageButton) findViewById(R.id.musicbutton);
+        mTextMessage            = (TextView) findViewById(R.id.message);
+        navigation              = (BottomNavigationView) findViewById(R.id.navigation);
+        topToolBar              = (Toolbar) findViewById(R.id.toolbar);
 
         // Set up the color state lists
         setupColorStateLists();
@@ -221,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
         circularSeekBarStuff(Cseekbar);
         toolbarStuff();
 
-        // Button listener for settings (top right
+        // Button listener for settings (top right)
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -231,13 +225,34 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+         //Button listener for pause and unpause
+        musicButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!music_state) { // Music is playing now so start our session
+                    music_state = true;
+                    musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_pause));
+                    Synch.session.release(); // Release our music semaphore so the session can start
+                } else { // Music is on pause
+                    music_state = false;
+                    musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_play));
+                    try {
+                        Synch.mutex_session_active.acquire();
+                        Synch.session_active = false;
+                        Synch.mutex_session_active.release();
+                    } catch (Exception e) {}
+                }
+            }
+        });
+
+
         // Listener for circular seek bar
         Cseekbar.setOnSeekBarChangeListener(new CircleSeekBarListener() {
             @Override
             public void onProgressChanged(CircularSeekBar circularSeekBar, int progress, boolean fromUser) {
                 Cseekbar.setProgress(progress); // Set the progress
                 // Check to see if the two seek bars are tied together
-                if (seekbar_lock == true) {
+                if (Synch.seekbar_lock) {
                     // Set the progress of the seek bar
                     seekBar.setProgress(progress, true);
                 }
@@ -258,7 +273,7 @@ public class MainActivity extends AppCompatActivity {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
                 seekBar.setProgress(progress);
                 // Check to see if the two seek bars are tied together
-                if (seekbar_lock == true) {
+                if (Synch.seekbar_lock) {
                     Cseekbar.setProgress(progress);
                 }
                 textViewvolumeProgress.setText(""+ progress + "%");
@@ -279,8 +294,70 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-}
+    Runnable SessionUpdate = new Runnable() {
+        private int timeMaxWait = 432000; // 7.2 minutes = 1% of 12 hours
+        private int time = 10000; // Time to wait until we check again
+        private int timeWaited = 0;
+        boolean s_active = false;
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    Synch.mutex_session_active.acquire();
+                    s_active = Synch.session_active;
+                    Synch.mutex_session_active.release();
 
+                    if (s_active) {
+                        try {
+                            Synch.mutex_seekbar_lock.acquire();
+                            Synch.seekbar_lock = false;
+                            Synch.mutex_seekbar_lock.release();
+                        } catch (Exception e) {
+                            System.out.println("Seekbar Acquiring Failed");
+                        }
+                    }
+
+                    sleep(time);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            // Get it before we do stuff so we can check if progress = 0
+                            int progress = Cseekbar.getProgress();
+
+                            if (s_active) {
+                                time = 10000; // Session is active, check every 10 seconds
+
+                                if (timeWaited == timeMaxWait) {
+                                    // 1% of 12 hours = 7.2 minutes
+                                    progress = progress - 1;
+
+                                    Cseekbar.setProgress(progress);
+                                    Cseekbar.setEnabled(false);
+                                    timeWaited = 0;
+                                } else {
+                                    timeWaited += time;
+                                }
+                            } else {
+                                time = 1000; // Check every 1 second if there's a new session
+                                Cseekbar.setEnabled(true);
+                                try {
+                                    Synch.mutex_seekbar_lock.acquire();
+                                    Synch.seekbar_lock = true;
+                                    Synch.mutex_seekbar_lock.release();
+                                } catch (Exception e) {}
+                            }
+                        }
+
+                    });
+                } catch (Exception e) {}
+
+            }
+        }
+    };
+
+
+}
 
 // Class for circular seek bar, we need it so don't you dare remove it
 class CircleSeekBarListener implements CircularSeekBar.OnCircularSeekBarChangeListener {

@@ -28,7 +28,7 @@
                 android:id="@+id/settings_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="10dp"
+                android:layout_marginEnd="10dp"
                 android:background="@drawable/bkg"
                 android:src="@drawable/ic_settings"/>
         </LinearLayout>
@@ -63,18 +63,6 @@
         android:textColor="@color/colorText"
         android:textSize="20sp" />
 
-    <TextView
-        android:id="@+id/volumeProgress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/seekBar"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="15dp"
-        android:text="@string/progress"
-        android:textColor="@color/colorText"
-        android:textSize="30sp" />
-
     <!--<TextView-->
         <!--android:id="@+id/volumeDeci"-->
         <!--android:layout_width="wrap_content"-->
@@ -97,16 +85,43 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <SeekBar
-        android:id="@+id/seekBar"
+    <LinearLayout
+        android:id="@+id/linLaySeek"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:layout_alignBottom="@id/navigation">
+
+        <SeekBar
+            android:id="@+id/seekBar"
+            android:layout_width="0dp"
+            android:layout_weight="0.8"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="125dp"
+            android:progressTint="@color/colorProgress"
+            android:thumbTint="@color/colorProgress"
+            android:progressBackgroundTint="@color/colorText"/>
+
+        <ImageButton
+            android:id="@+id/musicbutton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_play"
+            android:background="@drawable/bkg"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/volumeProgress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/linLaySeek"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="125dp"
-        android:progressTint="@color/colorProgress"
-        android:thumbTint="@color/colorProgress"
-        android:progressBackgroundTint="@color/colorText"/>
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
+        android:text="@string/progress"
+        android:textColor="@color/colorText"
+        android:textSize="30sp" />
 
     <View
         android:layout_width="match_parent"

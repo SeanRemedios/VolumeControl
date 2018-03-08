@@ -34,6 +34,7 @@
         </LinearLayout>
     </android.support.v7.widget.Toolbar>
 
+
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
@@ -67,7 +68,7 @@
         android:id="@+id/message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="75dp"
+        android:layout_marginTop="65dp"
         android:text="@string/title_stats"
         android:textColor="@color/colorText"
         app:layout_constraintLeft_toLeftOf="parent"
