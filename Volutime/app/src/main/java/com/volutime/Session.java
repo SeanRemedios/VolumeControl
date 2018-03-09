@@ -24,7 +24,7 @@ public class Session extends Thread {
             }
 
             // We've acquired the session semaphore which means the session has started
-            sendNotification();
+            sendNotification("Session Started", "Pause your music to pause the current session");
 
             try {
                 Synch.mutex_session_active.acquire();
@@ -32,15 +32,14 @@ public class Session extends Thread {
                 Synch.mutex_session_active.release();
             } catch (Exception e) {}
 
-
+            Synch.session_update.release();
         }
     }
 
-    private void sendNotification() {
+    public void sendNotification(String title, String body) {
         mNotificationUtils = new NotificationUtils(context);
         Notification.Builder nb = mNotificationUtils.
-                getAndroidChannelNotification("Session Started",
-                        "Pause your music to pause the current session");
+                getAndroidChannelNotification(title, body);
 
         mNotificationUtils.getManager().notify(101, nb.build());
         System.out.println("Notification Sent"); // Debug only

@@ -10,4 +10,7 @@
     <string name="session_description">Session Starting</string>
     <string name="progress">0%</string>
     <string name="deci">0%</string>
+
+    <string name="SharedPrefs_Time">TimeActivityPrefs</string>
+    <string name="SharePrefs_PastData">PastData</string>
 </resources>

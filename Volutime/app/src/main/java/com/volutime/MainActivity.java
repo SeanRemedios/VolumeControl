@@ -1,6 +1,7 @@
 package com.volutime;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -18,9 +19,8 @@ import android.widget.TextView;
 
 import com.devadvance.circularseekbar.CircularSeekBar;
 
+import java.util.Arrays;
 import java.util.concurrent.Semaphore;
-
-import static java.lang.Thread.sleep;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,21 +40,30 @@ public class MainActivity extends AppCompatActivity {
     private ColorStateList cslBelow;
 
     private boolean music_state = false; // For button use only not the session active counter
+    // To allow us to reset and not change both bars - lazy and stupid, will change later
+    private boolean reset_crutch = false;
+    private int time_listened = 0;
+    private int[] volumeArray = new int[100]; // Max we can have
+    private final int RATIO = 5; // ratio of volume to time
 
-    Session sessionThread;
 
     // This is for our thread stuff to make sure they don't get created again later
     public MainActivity() {
         // Declaring Mutex and Semaphores for threads
         Synch.mutex_session_active = new Semaphore(1, true);
         Synch.mutex_seekbar_lock = new Semaphore(1, true);
+        Synch.session_update = new Semaphore(0, true);
         Synch.session = new Semaphore(0, true);
+        Synch.time = new Semaphore(0, true);
 
+        Session sessionThread;
+        TimeKeeper timeKeeperThread;
         // Start the session thread
         sessionThread = new Session(this);
         sessionThread.start();
-        Thread sessionupdatethread = new Thread(SessionUpdate);
-        sessionupdatethread.start();
+        // Start the time keeper thread
+        timeKeeperThread = new TimeKeeper();
+        timeKeeperThread.start();
     }
 
     // Bottom Navigation view listener
@@ -130,35 +139,45 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkProgressCircle(int progress, CircularSeekBar circularSeekBar) {
+       int seekbarProgress = seekBar.getProgress();
+
+        if (progress > 70 && Synch.seekbar_lock && !Synch.session_active) {
+            // Just a warning since listening to music for a long time is dangerous at any level
+            changeCircSeekBarColor(R.color.colorOrange, circularSeekBar);
         // Eventually will change to properly check when it's at a dangerous level
-        if (progress > 75) {
-            // Get the color of the resource we have
-            int redColorValue = ContextCompat.getColor(getBaseContext(),
-                    R.color.colorRed);
-            // Change the circle's color
-            circularSeekBar.setCircleProgressColor(redColorValue);
+        } else if (progress-RATIO > seekbarProgress) {
+            changeCircSeekBarColor(R.color.colorRed, circularSeekBar);
         } else {
-            // Get the color of the resource we have
-            int greenColorValue = ContextCompat.getColor(getBaseContext(),
-                    R.color.colorProgress);
-            // Change the circle's color
-            circularSeekBar.setCircleProgressColor(greenColorValue);
+            changeCircSeekBarColor(R.color.colorProgress, circularSeekBar);
         }
     }
 
     private void checkProgressSeekbar(int progress, SeekBar seekBar) {
+        int cSeekBarProgress = Cseekbar.getProgress();
+
+        // It's dangerous if the volume is above 80%
+        if (progress > 80) {
+            changeSeekBarColor(cslAbove);
         // Eventually will change to properly check when it's at a dangerous level
-        if (progress > 75) {
-            // Change the progress tint to red
-            seekBar.setProgressTintList(cslAbove);
-            // Change the thumb as well
-            seekBar.setThumbTintList(cslAbove);
+        } else if (progress-RATIO > cSeekBarProgress) {
+            changeSeekBarColor(cslAbove);
         } else {
-            // Change the progress tint to red
-            seekBar.setProgressTintList(cslBelow);
-            // Change the thumb as well
-            seekBar.setThumbTintList(cslBelow);
+            changeSeekBarColor(cslBelow);
         }
+    }
+
+    private void changeSeekBarColor(ColorStateList csl) {
+        // Change the progress tint to red
+        seekBar.setProgressTintList(csl);
+        // Change the thumb as well
+        seekBar.setThumbTintList(csl);
+    }
+
+    private void changeCircSeekBarColor(int id, CircularSeekBar circularSeekBar) {
+        // Get the color of the resource we have
+        int color = ContextCompat.getColor(getBaseContext(), id);
+        // Change the circle's color
+        circularSeekBar.setCircleProgressColor(color);
     }
 
     private void setupColorStateLists() {
@@ -189,6 +208,52 @@ public class MainActivity extends AppCompatActivity {
         cslBelow = new ColorStateList(states, colorsBelow);
     }
 
+    private float averageVolume(int[] volumeArray) {
+        int sum = 0;
+        float avgVol = 0;
+        int i;
+        for (i = 0; i < volumeArray.length; i++) {
+            if (volumeArray[i] == -1) {
+                break;
+            }
+            sum += volumeArray[i];
+        }
+        avgVol = sum/i;
+        return avgVol;
+    }
+
+    private boolean checkVolumeArray(int[] volumeArray) {
+        boolean result = false;
+        for (int i = 0; i < volumeArray.length; i++) {
+            if (volumeArray[i] != -1) {
+                result = true;
+            }
+        }
+        return result;
+    }
+
+
+    private void addPastData(float volume, int time_listened) {
+        SharedPreferences settings = getSharedPreferences(getString(R.string.SharedPrefs_Time),0);
+        SharedPreferences.Editor editor = settings.edit();
+        // Necessary to clear first if we save preferences onPause.
+        editor.clear();
+        editor.putFloat("Volume", volume);
+        editor.putInt("TimeListened", time_listened);
+        editor.commit();
+    }
+
+    private void sessionEnded() {
+        music_state = false;
+        musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_play));
+        try {
+            Synch.mutex_session_active.acquire();
+            Synch.session_active = false;
+            Synch.mutex_session_active.release();
+        } catch (Exception e) {}
+        Arrays.fill(volumeArray, -1);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -205,6 +270,8 @@ public class MainActivity extends AppCompatActivity {
         mTextMessage            = (TextView) findViewById(R.id.message);
         navigation              = (BottomNavigationView) findViewById(R.id.navigation);
         topToolBar              = (Toolbar) findViewById(R.id.toolbar);
+
+        Arrays.fill(volumeArray, -1);
 
         // Set up the color state lists
         setupColorStateLists();
@@ -229,19 +296,32 @@ public class MainActivity extends AppCompatActivity {
         musicButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!music_state) { // Music is playing now so start our session
+                if (music_state == false) { // Music is playing now so start our session
                     music_state = true;
+                    Thread sessionupdatethread = new Thread(SessionUpdate);
+                    sessionupdatethread.start();
                     musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_pause));
                     Synch.session.release(); // Release our music semaphore so the session can start
                 } else { // Music is on pause
-                    music_state = false;
-                    musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_play));
-                    try {
-                        Synch.mutex_session_active.acquire();
-                        Synch.session_active = false;
-                        Synch.mutex_session_active.release();
-                    } catch (Exception e) {}
+                    sessionEnded();
                 }
+            }
+        });
+
+        // Reset button in top left
+        topToolBar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                boolean result = checkVolumeArray(volumeArray);
+                if (result) {
+                    float avgVol = averageVolume(volumeArray);
+                    addPastData(avgVol, time_listened);
+                }
+                sessionEnded();
+                // This allows us to only change the seekbar progress without changing the volume
+                reset_crutch = true;
+                Cseekbar.setProgress(0);
+                reset_crutch = false;
             }
         });
 
@@ -250,12 +330,19 @@ public class MainActivity extends AppCompatActivity {
         Cseekbar.setOnSeekBarChangeListener(new CircleSeekBarListener() {
             @Override
             public void onProgressChanged(CircularSeekBar circularSeekBar, int progress, boolean fromUser) {
-                Cseekbar.setProgress(progress); // Set the progress
                 // Check to see if the two seek bars are tied together
-                if (Synch.seekbar_lock) {
-                    // Set the progress of the seek bar
-                    seekBar.setProgress(progress, true);
+                if (Synch.seekbar_lock && !reset_crutch) {
+                    // Check if a session is active
+                    if (!Synch.session_active) {
+                        // Make sure the ratio is not above our max
+                        int newProgress = progress;
+                        if (progress+RATIO <= 100) {
+                            newProgress += RATIO;
+                        }
+                        seekBar.setProgress(newProgress,true);
+                    }
                 }
+                Cseekbar.setProgress(progress);
                 setTimeText(progress);
                 checkProgressCircle(progress, circularSeekBar); // Get the progress of the circle
             }
@@ -271,11 +358,19 @@ public class MainActivity extends AppCompatActivity {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
-                seekBar.setProgress(progress);
                 // Check to see if the two seek bars are tied together
-                if (Synch.seekbar_lock) {
-                    Cseekbar.setProgress(progress);
+                if (Synch.seekbar_lock && !reset_crutch) {
+                    // Check if a session is active
+                    if (!Synch.session_active) {
+                        // Make sure the ratio is not above our max
+                        int newProgress = progress;
+                        if (progress-RATIO >= 0) {
+                            newProgress -= RATIO;
+                        }
+                        Cseekbar.setProgress((newProgress));
+                    }
                 }
+                seekBar.setProgress(progress);
                 textViewvolumeProgress.setText(""+ progress + "%");
                 checkProgressSeekbar(progress, seekBar);
 
@@ -294,58 +389,128 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        SharedPreferences settings = getSharedPreferences(getString(R.string.SharedPrefs_Time),0);
+        SharedPreferences.Editor editor = settings.edit();
+        // Necessary to clear first if we save preferences onPause.
+        editor.clear();
+        editor.putInt("CSeekBarProgress", Cseekbar.getProgress());
+        editor.putInt("SeekbarProgress", seekBar.getProgress());
+        editor.putBoolean("MusicState", music_state);
+        editor.commit();
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+//        Cseekbar.setProgress(0);
+//        seekBar.setProgress(0);
+        music_state = false;
+        musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_play));
+        try {
+            Synch.mutex_session_active.acquire();
+            Synch.session_active = false;
+            Synch.mutex_session_active.release();
+        } catch (Exception e) {}
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        SharedPreferences sharedPref = this.getSharedPreferences(
+                getString(R.string.SharedPrefs_Time), this.MODE_PRIVATE);
+
+        int CSeekBarProgress = sharedPref.getInt("CSeekBarProgress", 0);
+        int SeekBarProgress = sharedPref.getInt("SeekBarProgress", 0);
+        music_state = sharedPref.getBoolean("MusicState", false);
+
+        Cseekbar.setProgress(CSeekBarProgress);
+        seekBar.setProgress(SeekBarProgress);
+        textViewvolumeProgress.setText("" + SeekBarProgress + "%");
+        setTimeText(CSeekBarProgress);
+
+        if (music_state) { // Music is playing now so start our session
+            musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_pause));
+        } else { // Music is on pause
+            musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_play));
+            try {
+                Synch.mutex_session_active.acquire();
+                Synch.session_active = false;
+                Synch.mutex_session_active.release();
+            } catch (Exception e) {}
+        }
+    }
+
+    // Don't touch this fuckery, except for the numbers
     Runnable SessionUpdate = new Runnable() {
-        private int timeMaxWait = 432000; // 7.2 minutes = 1% of 12 hours
-        private int time = 10000; // Time to wait until we check again
-        private int timeWaited = 0;
+        //private int timeMaxWait = 432000; // 7.2 minutes = 1% of 12 hours
+        //private int time = 10000; // Time to wait until we check again
         boolean s_active = false;
+        int count = 0;
+
         @Override
         public void run() {
-            while (true) {
+
+            try {
+                Synch.session_update.acquire();
+            } catch (Exception e) {}
+
+            while (Synch.session_active) {
                 try {
                     Synch.mutex_session_active.acquire();
                     s_active = Synch.session_active;
                     Synch.mutex_session_active.release();
 
-                    if (s_active) {
-                        try {
-                            Synch.mutex_seekbar_lock.acquire();
-                            Synch.seekbar_lock = false;
-                            Synch.mutex_seekbar_lock.release();
-                        } catch (Exception e) {
-                            System.out.println("Seekbar Acquiring Failed");
-                        }
-                    }
+                    //System.out.println("Sleeping for: " + time/1000);
 
-                    sleep(time);
+                    System.out.println("Waiting");
+
+                    // Wait for it to be released from TimeKeeper class
+                    Synch.time.acquire(); // Already in a try, catch
+
+                    // Add the time listened on every release
+                    time_listened += TimeKeeper.TIMEMAXWAIT;
+                    // Get the volume and add it to the array to average it later
+                    int volume = seekBar.getProgress();
+                    volumeArray[count] = volume;
+                    count++;
+
+                    System.out.println("Released");
+
+                    // This allows us to change UI stuff
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-
                             // Get it before we do stuff so we can check if progress = 0
                             int progress = Cseekbar.getProgress();
 
                             if (s_active) {
-                                time = 10000; // Session is active, check every 10 seconds
+                                // 1% of 12 hours = 7.2 minutes
+                                progress = progress - 1;
+                                Cseekbar.setProgress(progress);
+                                Cseekbar.setEnabled(false);
 
-                                if (timeWaited == timeMaxWait) {
-                                    // 1% of 12 hours = 7.2 minutes
-                                    progress = progress - 1;
-
-                                    Cseekbar.setProgress(progress);
-                                    Cseekbar.setEnabled(false);
-                                    timeWaited = 0;
-                                } else {
-                                    timeWaited += time;
-                                }
                             } else {
-                                time = 1000; // Check every 1 second if there's a new session
                                 Cseekbar.setEnabled(true);
-                                try {
-                                    Synch.mutex_seekbar_lock.acquire();
-                                    Synch.seekbar_lock = true;
-                                    Synch.mutex_seekbar_lock.release();
-                                } catch (Exception e) {}
+                            }
+
+                            // Get it before we do stuff so we can check if progress = 0
+                            progress = Cseekbar.getProgress();
+                            // Get an instance of the class so we can get the notification funciton
+                            Session session = new Session(getBaseContext());
+
+                            if (progress == 0) {
+                                session.sendNotification("Session Ended",
+                                        "Time up! Turn off your music to prevent damage!");
+                                sessionEnded();
+                            } else if (progress <= 2) {
+                                session.sendNotification("Session Almost Done",
+                                        "Less than 15 minutes left in the current session!");
                             }
                         }
 
