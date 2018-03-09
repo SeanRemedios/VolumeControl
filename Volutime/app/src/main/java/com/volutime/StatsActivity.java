@@ -12,12 +12,19 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-public class StatsActivity extends AppCompatActivity  {
+import java.util.ArrayList;
+
+public class StatsActivity extends AppCompatActivity {
 
     private TextView mTextMessage;
     Toolbar topToolBar;
     private ImageButton settingsButton;
     BottomNavigationView navigation;
+
+    // Statistics are gotten from the MainActivity class through getters that are populated in
+    // the onResume function when the page is clicked.
+    ArrayList<Float> volumes = new ArrayList<>();
+    ArrayList<Integer> times_listened = new ArrayList<>();
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -48,7 +55,7 @@ public class StatsActivity extends AppCompatActivity  {
         Intent intent = new Intent(this, cl);
         startActivity(intent);
     }
-
+    
     private void navigationStuff() {
         navigation.setSelectedItemId(R.id.navigation_stats);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -83,5 +90,14 @@ public class StatsActivity extends AppCompatActivity  {
                 finish();
             }
         });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        MainActivity main = new MainActivity();
+        volumes = main.getVolume();
+        times_listened = main.getTimes_listened();
     }
 }
