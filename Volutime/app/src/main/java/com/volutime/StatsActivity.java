@@ -55,7 +55,7 @@ public class StatsActivity extends AppCompatActivity {
         Intent intent = new Intent(this, cl);
         startActivity(intent);
     }
-    
+
     private void navigationStuff() {
         navigation.setSelectedItemId(R.id.navigation_stats);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -97,7 +97,12 @@ public class StatsActivity extends AppCompatActivity {
         super.onResume();
 
         MainActivity main = new MainActivity();
-        volumes = main.getVolume();
-        times_listened = main.getTimes_listened();
+        try{
+            Synch.mutex_statistics.acquire();
+            // Synch.volumes;
+            // Synch.times_listened;
+            // Synch.dateTimeStarted;
+            Synch.mutex_statistics.release();
+        } catch (Exception e) {}
     }
 }

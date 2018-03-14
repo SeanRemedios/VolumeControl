@@ -19,7 +19,7 @@ import android.widget.TextView;
 
 import com.devadvance.circularseekbar.CircularSeekBar;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 
@@ -46,10 +46,6 @@ public class MainActivity extends AppCompatActivity {
     private int time_listened = 0;
     private int[] volumeArray = new int[100]; // Max we can have
     private final int RATIO = 5; // ratio of volume to time
-
-    // To be used in the statistics class
-    public ArrayList<Integer> times_listened = new ArrayList<>();
-    public ArrayList<Float> volumes = new ArrayList<>();
 
 
     // This is for our thread stuff to make sure they don't get created again later
@@ -239,18 +235,12 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void addPastData(float volume, int time_listened) {
-        volumes.add(volume);
-        times_listened.add(time_listened);
-    }
-
-    public ArrayList<Float> getVolume() {
-        volumes.add(3.14f);
-        return volumes;
-    }
-
-    public ArrayList<Integer> getTimes_listened() {
-        times_listened.add(6000);
-        return times_listened;
+        try {
+            Synch.mutex_statistics.acquire();
+            Synch.volumes.add(volume);
+            Synch.times_listened.add(time_listened);
+            Synch.mutex_statistics.release();
+        } catch (Exception e) {}
     }
 
     private void sessionEnded() {
@@ -312,6 +302,13 @@ public class MainActivity extends AppCompatActivity {
                     sessionupdatethread.start();
                     musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_pause));
                     Synch.session.release(); // Release our music semaphore so the session can start
+
+                    try {
+                        Synch.mutex_statistics.acquire();
+                        Synch.dateTimeStarted.add(LocalDateTime.now());
+                        Synch.mutex_statistics.release();
+                    } catch (Exception e) {}
+
                 } else { // Music is on pause
                     sessionEnded();
                 }
