@@ -13,4 +13,7 @@
 
     <string name="SharedPrefs_Time">TimeActivityPrefs</string>
     <string name="SharePrefs_PastData">PastData</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

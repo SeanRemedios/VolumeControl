@@ -287,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Launch the settings activity
-                launchActivity(SettingsActivity.class);
+                launchActivity(SettingActivity.class);
                 finish();
             }
         });

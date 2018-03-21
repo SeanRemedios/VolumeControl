@@ -81,7 +81,7 @@ public class ProfileActivity extends AppCompatActivity  {
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                launchActivity(SettingsActivity.class);
+                launchActivity(SettingActivity.class);
                 finish();
             }
         });

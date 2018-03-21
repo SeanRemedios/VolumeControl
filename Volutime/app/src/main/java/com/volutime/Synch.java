@@ -20,6 +20,6 @@ public class Synch {
 
     public static boolean session_active = false;
     // The lock that ties the two seek bars together
-    public static boolean seekbar_lock = true; // true = locked
+    public static boolean seekbar_lock = true; // true = locked  -> Linking Setting
 
 }
