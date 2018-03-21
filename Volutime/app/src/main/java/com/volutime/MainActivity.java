@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.content.ContextCompat;
@@ -16,6 +17,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.devadvance.circularseekbar.CircularSeekBar;
 
@@ -281,6 +283,15 @@ public class MainActivity extends AppCompatActivity {
         navigationStuff(navigation);
         circularSeekBarStuff(Cseekbar);
         toolbarStuff();
+
+        //Checking Linking Setting Value
+        SharedPreferences sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(this);
+        Boolean switchPref = sharedPref.getBoolean
+                (SettingActivity.KEY_PREF_LINK_SWITCH, false);
+        Synch.seekbar_lock = switchPref;
+        //Toast.makeText(this, switchPref.toString(), Toast.LENGTH_SHORT).show();
+
 
         // Button listener for settings (top right)
         settingsButton.setOnClickListener(new View.OnClickListener() {

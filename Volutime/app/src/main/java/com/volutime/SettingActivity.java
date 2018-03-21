@@ -13,6 +13,8 @@ import android.widget.Toast;
 
 public class SettingActivity extends AppCompatActivity {
 
+    public static final String
+            KEY_PREF_LINK_SWITCH = "Switch_L";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +31,7 @@ public class SettingActivity extends AppCompatActivity {
             case android.R.id.home:
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
+                finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);
