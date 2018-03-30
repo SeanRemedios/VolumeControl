@@ -10,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 public class ProfileActivity extends AppCompatActivity  {
@@ -18,6 +19,7 @@ public class ProfileActivity extends AppCompatActivity  {
     Toolbar topToolBar;
     private ImageButton settingsButton;
     BottomNavigationView navigation;
+    public boolean HeadphoneType = true;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -85,5 +87,21 @@ public class ProfileActivity extends AppCompatActivity  {
                 finish();
             }
         });
+    }
+
+    public void onRadioButtonClicked(View view) {
+        // Is the button now checked?
+        boolean checked = ((RadioButton) view).isChecked();
+        // Check which radio button was clicked
+        switch(view.getId()) {
+            case R.id.RB_Earbud:
+                if (checked)
+                    HeadphoneType = true;
+                    break;
+            case R.id.RB_OTE:
+                if (checked)
+                    HeadphoneType = false;
+                    break;
+        }
     }
 }

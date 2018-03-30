@@ -16,6 +16,10 @@ public class SettingActivity extends AppCompatActivity {
     public static final String
             KEY_PREF_LINK_SWITCH = "Switch_L";
 
+    public static final String
+            KEY_PREF_NOTE_SWITCH = "Switch_Note";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

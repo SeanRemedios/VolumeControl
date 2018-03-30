@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton settingsButton;
     private ImageButton musicButton;
     private BottomNavigationView navigation;
+    private boolean switchNote = true;
 
     // These are our color state lists for the seekbar
     private ColorStateList cslAbove;
@@ -292,6 +293,9 @@ public class MainActivity extends AppCompatActivity {
         Synch.seekbar_lock = switchPref;
         //Toast.makeText(this, switchPref.toString(), Toast.LENGTH_SHORT).show();
 
+         switchNote= sharedPref.getBoolean
+                (SettingActivity.KEY_PREF_NOTE_SWITCH, true);
+
 
         // Button listener for settings (top right)
         settingsButton.setOnClickListener(new View.OnClickListener() {
@@ -522,14 +526,15 @@ public class MainActivity extends AppCompatActivity {
                             // Get an instance of the class so we can get the notification funciton
                             Session session = new Session(getBaseContext());
 
-                            if (progress == 0) {
-                                session.sendNotification("Session Ended",
-                                        "Time up! Turn off your music to prevent damage!");
-                                sessionEnded();
-                            } else if (progress <= 2) {
-                                session.sendNotification("Session Almost Done",
-                                        "Less than 15 minutes left in the current session!");
-                            }
+                            if (switchNote)
+                                if (progress == 0) {
+                                    session.sendNotification("Session Ended",
+                                            "Time up! Turn off your music to prevent damage!");
+                                    sessionEnded();
+                                } else if (progress <= 2) {
+                                    session.sendNotification("Session Almost Done",
+                                            "Less than 15 minutes left in the current session!");
+                                }
                         }
 
                     });

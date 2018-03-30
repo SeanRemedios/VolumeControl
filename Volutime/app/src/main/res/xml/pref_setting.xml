@@ -11,8 +11,12 @@
         android:key="Switch_CB"
         android:summary="Enable mode to help distinguish between colours"
         android:title="Colourblind" />
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:key="CB_Note"
+    <SwitchPreference
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:defaultValue="true"
+        android:key="Switch_Note"
+        android:summary="Enable to notify the user after the session is done"
         android:title="Notifications" />
+
 </PreferenceScreen>
