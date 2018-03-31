@@ -40,10 +40,12 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton musicButton;
     private BottomNavigationView navigation;
     private boolean switchNote = true;
+    private boolean switchCB = false;
 
     // These are our color state lists for the seekbar
     private ColorStateList cslAbove;
     private ColorStateList cslBelow;
+    private ColorStateList cslBelowCB;
 
     private final boolean MUSIC_ON = true;
     private final boolean MUSIC_OFF = false;
@@ -111,9 +113,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void seekBarStuff(SeekBar seekBar) {
+        int id;
         // Set the color of the seek bar
+        if (switchCB) {
+            id = R.color.colorCBProgress;
+        } else {
+            id = R.color.colorProgress;
+        }
+
         seekBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(getBaseContext(),
-                R.color.colorProgress),android.graphics.PorterDuff.Mode.MULTIPLY);
+                id),android.graphics.PorterDuff.Mode.MULTIPLY);
     }
 
     private void navigationStuff(BottomNavigationView navigation) {
@@ -159,7 +168,13 @@ public class MainActivity extends AppCompatActivity {
         } else if (progress-RATIO >= seekbarProgress || progress > 70) {
             changeCircSeekBarColor(R.color.colorRed, circularSeekBar);
         } else {
-            changeCircSeekBarColor(R.color.colorProgress, circularSeekBar);
+            int id;
+            if (switchCB) {
+                id = R.color.colorCBProgress;
+            } else {
+                id = R.color.colorProgress;
+            }
+            changeCircSeekBarColor(id, circularSeekBar);
         }
     }
 
@@ -173,7 +188,11 @@ public class MainActivity extends AppCompatActivity {
         } else if (progress-RATIO > cSeekBarProgress) {
             changeSeekBarColor(cslAbove);
         } else {
-            changeSeekBarColor(cslBelow);
+            if (switchCB) {
+                changeSeekBarColor(cslBelowCB);
+            } else {
+                changeSeekBarColor(cslBelow);
+            }
         }
     }
 
@@ -199,10 +218,18 @@ public class MainActivity extends AppCompatActivity {
                 new int[] { android.R.attr.state_pressed}  // pressed
         };
 
+
         // See states for order
         int[] colorsBelow = new int[] {
                 ContextCompat.getColor(getBaseContext(),
                         R.color.colorProgress),
+                Color.WHITE,
+                Color.WHITE,
+                Color.WHITE
+        };
+        int[] colorsBelowCB = new int[] {
+                ContextCompat.getColor(getBaseContext(),
+                        R.color.colorCBProgress),
                 Color.WHITE,
                 Color.WHITE,
                 Color.WHITE
@@ -217,6 +244,7 @@ public class MainActivity extends AppCompatActivity {
 
         cslAbove = new ColorStateList(states, colorsAbove);
         cslBelow = new ColorStateList(states, colorsBelow);
+        cslBelowCB = new ColorStateList(states, colorsBelowCB);
     }
 
     private float averageVolume(int[] volumeArray) {
@@ -302,10 +330,15 @@ public class MainActivity extends AppCompatActivity {
 
         //Checking Linking Setting Value
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-//        Boolean switchPref = sharedPref.getBoolean(SettingActivity.KEY_PREF_LINK_SWITCH, true);
-//        Synch.seekbar_lock = switchPref;
+        Boolean switchPref = sharedPref.getBoolean(SettingActivity.KEY_PREF_LINK_SWITCH, true);
+        try {
+            Synch.mutex_seekbar_lock.acquire();
+            Synch.seekbar_lock = switchPref;
+            Synch.mutex_seekbar_lock.release();
+        } catch (Exception e) {}
         //Toast.makeText(this, switchPref.toString(), Toast.LENGTH_SHORT).show();
         switchNote = sharedPref.getBoolean(SettingActivity.KEY_PREF_NOTE_SWITCH, true);
+        switchCB = sharedPref.getBoolean(SettingActivity.KEY_PREF_CB_SWITCH, false);
 
         // Button listener for settings (top right)
         settingsButton.setOnClickListener(new View.OnClickListener() {

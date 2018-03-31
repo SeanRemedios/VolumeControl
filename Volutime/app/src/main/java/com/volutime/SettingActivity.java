@@ -8,6 +8,7 @@ import android.view.MenuItem;
 public class SettingActivity extends AppCompatActivity {
     public static final String KEY_PREF_LINK_SWITCH = "Switch_L";
     public static final String KEY_PREF_NOTE_SWITCH = "Switch_Note";
+    public static final String KEY_PREF_CB_SWITCH = "Switch_CB";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -15,7 +16,6 @@ public class SettingActivity extends AppCompatActivity {
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new SettingFragment())
                 .commit();
-
     }
 
     @Override

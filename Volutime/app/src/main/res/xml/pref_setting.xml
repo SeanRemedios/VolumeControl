@@ -2,9 +2,9 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <SwitchPreference
-        android:defaultValue="false"
+        android:defaultValue="true"
         android:key="Switch_L"
-        android:summary="Enable to show best settings when setting time or volume are linked"
+        android:summary="Disable to show best settings when setting time or volume are linked"
         android:title="Link" />
     <SwitchPreference
         android:defaultValue="false"
