@@ -11,8 +11,8 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
-            android:configChanges="screenLayout|keyboardHidden|orientation"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:configChanges="screenLayout|keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -21,8 +21,8 @@
         </activity>
         <activity
             android:name=".ProfileActivity"
-            android:configChanges="screenLayout|keyboardHidden|orientation"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:configChanges="screenLayout|keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.CALL" />
 
@@ -31,18 +31,8 @@
         </activity>
         <activity
             android:name=".StatsActivity"
-            android:configChanges="screenLayout|keyboardHidden|orientation"
-            android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="android.intent.action.CALL" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".SettingsActivity"
-            android:configChanges="screenLayout|keyboardHidden|orientation"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:configChanges="screenLayout|keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.CALL" />
 

@@ -10,13 +10,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 
 public class StatsActivity extends AppCompatActivity {
 
-    private TextView mTextMessage;
+//    private TextView mTextMessage;
     Toolbar topToolBar;
     private ImageButton settingsButton;
     BottomNavigationView navigation;
@@ -33,17 +32,12 @@ public class StatsActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_profile:
-                    mTextMessage.setText("Profile");
                     launchActivity(ProfileActivity.class);
-                    finish();
                     return true;
                 case R.id.navigation_time:
-                    mTextMessage.setText("Time");
                     launchActivity(MainActivity.class);
-                    finish();
                     return true;
                 case R.id.navigation_stats:
-                    mTextMessage.setText("Statistics");
                     return true;
             }
             return false;
@@ -75,7 +69,7 @@ public class StatsActivity extends AppCompatActivity {
 
         settingsButton = (ImageButton) findViewById(R.id.settings_button);
 
-        mTextMessage = (TextView) findViewById(R.id.message);
+//        mTextMessage = (TextView) findViewById(R.id.message);
         navigation = (BottomNavigationView) findViewById(R.id.navigation);
 
         topToolBar = (Toolbar) findViewById(R.id.toolbar);
@@ -86,7 +80,9 @@ public class StatsActivity extends AppCompatActivity {
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                launchActivity(SettingActivity.class);
+                Intent i = new Intent(getBaseContext(), SettingActivity.class);
+                i.putExtra("FromClass", "Stats");
+                startActivity(i);
                 finish();
             }
         });

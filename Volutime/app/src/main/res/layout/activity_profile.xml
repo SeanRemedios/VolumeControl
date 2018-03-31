@@ -21,14 +21,14 @@
             android:id="@+id/toolbarLayout"
             android:layout_width="wrap_content"
             android:background="@color/colorBackground"
-            android:layout_gravity="right"
+            android:layout_gravity="end"
             android:layout_height="match_parent">
 
             <ImageButton
                 android:id="@+id/settings_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="10dp"
+                android:layout_marginEnd="10dp"
                 android:background="@drawable/bkg"
                 android:src="@drawable/ic_settings"/>
         </LinearLayout>
@@ -71,42 +71,46 @@
         android:layout_below="@+id/view"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="17dp"
-        app:srcCompat="@mipmap/ic_launcher_round" android:contentDescription="TODO" />
+        app:srcCompat="@mipmap/ic_launcher_round"
+        android:contentDescription="Profile Image"/>
 
     <RadioGroup
         android:id="@+id/RG_HeadphoneType"
-        android:layout_width="fill_parent"
-        android:layout_height="80dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/Label2"
         android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:orientation="vertical"
         android:weightSum="1">
 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center_horizontal">
         <RadioButton
             android:id="@+id/RB_Earbud"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:layout_gravity="center_vertical"
             android:checked="true"
-            android:paddingRight="20dp"
             android:text="Earbuds"
             android:textColor="#ffffff"
-            android:textSize="20dp" />
+            android:textSize="20sp" />
 
         <RadioButton
             android:id="@+id/RB_OTE"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/RG_HeadphoneType"
-            android:layout_centerHorizontal="true"
-            android:layout_gravity="center_horizontal"
+            android:layout_gravity="center_vertical"
             android:layout_marginBottom="13dp"
-            android:layout_weight="0.13"
             android:checked="false"
-            android:paddingRight="15dp"
             android:text="Over the Ear"
             android:textColor="#ffffff"
-            android:textSize="20dp" />
+            android:textSize="20sp" />
+        </LinearLayout>
     </RadioGroup>
 
     <TextView
@@ -119,7 +123,7 @@
         android:text="Set Preferences"
         android:textAlignment="center"
         android:textColor="#ffffff"
-        android:textSize="20dp" />
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/Label2"
@@ -133,32 +137,90 @@
         android:textColor="#ffffff"
         android:textSize="20sp" />
 
-    <EditText
-        android:id="@+id/editText"
+    <RelativeLayout
+        android:id="@+id/setVolTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/Label1"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"
-        android:ems="10"
-        android:inputType="number"
-        android:text="Volume %"
-        android:textAlignment="center"
-        android:textColor="#ffffff" />
+        android:layout_below="@+id/Label1">
+        <LinearLayout
+            android:id="@+id/volumeLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/Label3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Volume"
+                android:layout_marginTop="7dp"
+                android:textColor="#ffffff"
+                android:textSize="20sp"/>
 
-    <EditText
-        android:id="@+id/editText2"
+            <EditText
+                android:id="@+id/volume_edit"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:inputType="number"
+                android:textColor="#ffffff"
+                android:hint="0"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/Label4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="%"
+                android:layout_marginTop="7dp"
+                android:textColor="#ffffff"
+                android:textSize="20sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/volumeLayout">
+            <TextView
+                android:id="@+id/Label5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Time"
+                android:layout_marginTop="7dp"
+                android:textColor="#ffffff"
+                android:textSize="20sp"/>
+
+            <EditText
+                android:id="@+id/time_edit"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:inputType="number"
+                android:textColor="#ffffff"
+                android:hint="0.0"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/Label6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="hrs"
+                android:layout_marginTop="7dp"
+                android:textColor="#ffffff"
+                android:textSize="20sp"/>
+        </LinearLayout>
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/setprefs_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/editText"
-        android:layout_below="@+id/editText"
-        android:layout_marginTop="7dp"
-        android:ems="10"
-        android:inputType="number"
-        android:text="Time"
-        android:textAlignment="center"
-        android:textColor="#ffffff" />
+        android:layout_below="@+id/setVolTime"
+        android:layout_centerInParent="true"
 
+        android:text="Set"
+        android:textColor="#ffffff"
+        android:textSize="20sp"/>
 
 
 </RelativeLayout>

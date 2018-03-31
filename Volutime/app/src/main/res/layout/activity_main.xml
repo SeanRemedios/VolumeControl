@@ -30,7 +30,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
                 android:background="@drawable/bkg"
-                android:src="@drawable/ic_settings" />
+                android:src="@drawable/ic_settings"/>
         </LinearLayout>
     </android.support.v7.widget.Toolbar>
 
@@ -75,15 +75,15 @@
         <!--android:textColor="@color/colorText"-->
         <!--android:textSize="20sp" />-->
 
-    <TextView
-        android:id="@+id/message"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="75dp"
-        android:text="@string/title_time"
-        android:textColor="@color/colorText"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <!--<TextView-->
+        <!--android:id="@+id/message"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginTop="75dp"-->
+        <!--android:text="@string/title_time"-->
+        <!--android:textColor="@color/colorText"-->
+        <!--app:layout_constraintLeft_toLeftOf="parent"-->
+        <!--app:layout_constraintTop_toTopOf="parent" />-->
 
     <LinearLayout
         android:id="@+id/linLaySeek"
@@ -107,7 +107,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_play"
-            android:background="@drawable/bkg"/>
+            android:background="@drawable/bkg"
+            android:contentDescription="Music Button" />
 
     </LinearLayout>
 

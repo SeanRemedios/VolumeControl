@@ -9,7 +9,7 @@
     <item
         android:id="@+id/navigation_time"
         android:icon="@drawable/ic_time"
-        android:title="Time" />
+        android:title="Session" />
 
     <item
         android:id="@+id/navigation_stats"
