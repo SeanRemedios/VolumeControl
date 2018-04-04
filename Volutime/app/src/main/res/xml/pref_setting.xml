@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="Switch_L"
+        android:summary="Disable to show best settings when setting time or volume are linked"
+        android:title="Link" />
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="Switch_CB"
+        android:summary="Enable mode to help distinguish between colours"
+        android:title="Colourblind" />
+    <SwitchPreference
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:defaultValue="true"
+        android:key="Switch_Note"
+        android:summary="Enable to notify the user after the session is done"
+        android:title="Notifications" />
+
+</PreferenceScreen>

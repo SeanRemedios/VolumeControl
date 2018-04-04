@@ -11,4 +11,6 @@
     <color name="colorText">#FFFFFF</color>
     <color name="colorChecked">#FFFFFF</color>
     <color name="colorUnChecked">#787878</color>
+
+    <color name="colorCBProgress">#3BB9FF</color>
 </resources>

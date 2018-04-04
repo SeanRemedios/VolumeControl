@@ -1,10 +1,14 @@
 package com.volutime;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.content.ContextCompat;
@@ -26,7 +30,7 @@ import java.util.concurrent.Semaphore;
 public class MainActivity extends AppCompatActivity {
 
     // Declare the activity components for later
-    private TextView mTextMessage;
+//    private TextView mTextMessage;
     private TextView textViewvolumeProgress;
     private TextView textViewProgress;
     private SeekBar seekBar;
@@ -35,24 +39,32 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton settingsButton;
     private ImageButton musicButton;
     private BottomNavigationView navigation;
+    private boolean switchNote = true;
+    private boolean switchCB = false;
 
     // These are our color state lists for the seekbar
     private ColorStateList cslAbove;
     private ColorStateList cslBelow;
+    private ColorStateList cslBelowCB;
 
-    private boolean music_state = false; // For button use only not the session active counter
+    private final boolean MUSIC_ON = true;
+    private final boolean MUSIC_OFF = false;
+
     // To allow us to reset and not change both bars - lazy and stupid, will change later
     private boolean reset_crutch = false;
     private int time_listened = 0;
     private int[] volumeArray = new int[100]; // Max we can have
-    private final int RATIO = 5; // ratio of volume to time
+    private final int RATIO = 30; // ratio of volume to time
 
+    private static MediaPlayer mp2 = null;
 
     // This is for our thread stuff to make sure they don't get created again later
     public MainActivity() {
         // Declaring Mutex and Semaphores for threads
+        Synch.mutex_background_counters = new Semaphore(1, true);
         Synch.mutex_session_active = new Semaphore(1, true);
         Synch.mutex_seekbar_lock = new Semaphore(1, true);
+        Synch.mutex_music_state = new Semaphore(1, true);
         Synch.session_update = new Semaphore(0, true);
         Synch.session = new Semaphore(0, true);
         Synch.time = new Semaphore(0, true);
@@ -77,16 +89,16 @@ public class MainActivity extends AppCompatActivity {
             switch (item.getItemId()) {
                 // Tab on the left
                 case R.id.navigation_profile:
-                    mTextMessage.setText("Profile");
+//                    mTextMessage.setText("Profile");
                     launchActivity(ProfileActivity.class); // Launch the tab's activity
                     return true;
                 // Tab in the middle
                 case R.id.navigation_time: // This is current, do nothing
-                    mTextMessage.setText("Time");
+//                    mTextMessage.setText("Time");
                     return true;
                 // Tab on the right
                 case R.id.navigation_stats:
-                    mTextMessage.setText("Statistics");
+//                    mTextMessage.setText("Statistics");
                     launchActivity(StatsActivity.class); // Launch the tab's activity
                     return true;
             }
@@ -101,9 +113,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void seekBarStuff(SeekBar seekBar) {
+        int id;
         // Set the color of the seek bar
+        if (switchCB) {
+            id = R.color.colorCBProgress;
+        } else {
+            id = R.color.colorProgress;
+        }
+
         seekBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(getBaseContext(),
-                R.color.colorProgress),android.graphics.PorterDuff.Mode.MULTIPLY);
+                id),android.graphics.PorterDuff.Mode.MULTIPLY);
     }
 
     private void navigationStuff(BottomNavigationView navigation) {
@@ -123,6 +142,8 @@ public class MainActivity extends AppCompatActivity {
         // Set up the tool bar as an action bar
         setSupportActionBar(topToolBar);
         ActionBar actionBar = getSupportActionBar();
+        assert actionBar != null;
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
         actionBar.setDisplayHomeAsUpEnabled(true); // This is the back button in the top left
 
     }
@@ -142,14 +163,20 @@ public class MainActivity extends AppCompatActivity {
     private void checkProgressCircle(int progress, CircularSeekBar circularSeekBar) {
        int seekbarProgress = seekBar.getProgress();
 
-        if (progress > 70 && Synch.seekbar_lock && !Synch.session_active) {
+        if (progress > 70 && progress < 90 && Synch.seekbar_lock && !Synch.session_active) {
             // Just a warning since listening to music for a long time is dangerous at any level
             changeCircSeekBarColor(R.color.colorOrange, circularSeekBar);
         // Eventually will change to properly check when it's at a dangerous level
-        } else if (progress-RATIO > seekbarProgress) {
+        } else if (progress-RATIO >= seekbarProgress || progress > 70) {
             changeCircSeekBarColor(R.color.colorRed, circularSeekBar);
         } else {
-            changeCircSeekBarColor(R.color.colorProgress, circularSeekBar);
+            int id;
+            if (switchCB) {
+                id = R.color.colorCBProgress;
+            } else {
+                id = R.color.colorProgress;
+            }
+            changeCircSeekBarColor(id, circularSeekBar);
         }
     }
 
@@ -163,7 +190,11 @@ public class MainActivity extends AppCompatActivity {
         } else if (progress-RATIO > cSeekBarProgress) {
             changeSeekBarColor(cslAbove);
         } else {
-            changeSeekBarColor(cslBelow);
+            if (switchCB) {
+                changeSeekBarColor(cslBelowCB);
+            } else {
+                changeSeekBarColor(cslBelow);
+            }
         }
     }
 
@@ -189,10 +220,18 @@ public class MainActivity extends AppCompatActivity {
                 new int[] { android.R.attr.state_pressed}  // pressed
         };
 
+
         // See states for order
         int[] colorsBelow = new int[] {
                 ContextCompat.getColor(getBaseContext(),
                         R.color.colorProgress),
+                Color.WHITE,
+                Color.WHITE,
+                Color.WHITE
+        };
+        int[] colorsBelowCB = new int[] {
+                ContextCompat.getColor(getBaseContext(),
+                        R.color.colorCBProgress),
                 Color.WHITE,
                 Color.WHITE,
                 Color.WHITE
@@ -207,6 +246,7 @@ public class MainActivity extends AppCompatActivity {
 
         cslAbove = new ColorStateList(states, colorsAbove);
         cslBelow = new ColorStateList(states, colorsBelow);
+        cslBelowCB = new ColorStateList(states, colorsBelowCB);
     }
 
     private float averageVolume(int[] volumeArray) {
@@ -243,15 +283,17 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {}
     }
 
-    private void sessionEnded() {
-        music_state = false;
-        musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_play));
+    private void sessionEnded(boolean pause) {
+//        musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_play));
         try {
             Synch.mutex_session_active.acquire();
             Synch.session_active = false;
             Synch.mutex_session_active.release();
         } catch (Exception e) {}
         Arrays.fill(volumeArray, -1);
+        if (pause) {
+            Cseekbar.setIsTouchEnabled(true);
+        }
     }
 
     @Override
@@ -267,9 +309,15 @@ public class MainActivity extends AppCompatActivity {
         Cseekbar                = (CircularSeekBar) findViewById(R.id.circularSeekBar1);
         settingsButton          = (ImageButton) findViewById(R.id.settings_button);
         musicButton             = (ImageButton) findViewById(R.id.musicbutton);
-        mTextMessage            = (TextView) findViewById(R.id.message);
         navigation              = (BottomNavigationView) findViewById(R.id.navigation);
         topToolBar              = (Toolbar) findViewById(R.id.toolbar);
+
+        // Music
+        if (mp2 == null) {
+            mp2 = MediaPlayer.create(MainActivity.this, R.raw.u_rite_they);
+            mp2.setLooping(true);
+        }
+        final AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
         Arrays.fill(volumeArray, -1); // Fill the volume array with negative values
 
@@ -282,13 +330,26 @@ public class MainActivity extends AppCompatActivity {
         circularSeekBarStuff(Cseekbar);
         toolbarStuff();
 
+        //Checking Linking Setting Value
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        Boolean switchPref = sharedPref.getBoolean(SettingActivity.KEY_PREF_LINK_SWITCH, true);
+        try {
+            Synch.mutex_seekbar_lock.acquire();
+            Synch.seekbar_lock = switchPref;
+            Synch.mutex_seekbar_lock.release();
+        } catch (Exception e) {}
+        //Toast.makeText(this, switchPref.toString(), Toast.LENGTH_SHORT).show();
+        switchNote = sharedPref.getBoolean(SettingActivity.KEY_PREF_NOTE_SWITCH, true);
+        switchCB = sharedPref.getBoolean(SettingActivity.KEY_PREF_CB_SWITCH, false);
+
         // Button listener for settings (top right)
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Launch the settings activity
-                launchActivity(SettingsActivity.class);
-                finish();
+                Intent i = new Intent(getBaseContext(), SettingActivity.class);
+                i.putExtra("FromClass", "Main");
+                startActivity(i);
             }
         });
 
@@ -296,21 +357,47 @@ public class MainActivity extends AppCompatActivity {
         musicButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (music_state == false) { // Music is playing now so start our session
-                    music_state = true;
-                    Thread sessionupdatethread = new Thread(SessionUpdate);
-                    sessionupdatethread.start();
-                    musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_pause));
-                    Synch.session.release(); // Release our music semaphore so the session can start
 
-                    try {
-                        Synch.mutex_statistics.acquire();
-                        Synch.dateTimeStarted.add(LocalDateTime.now());
-                        Synch.mutex_statistics.release();
-                    } catch (Exception e) {}
+                if (Synch.music_state == MUSIC_OFF) { // Music is playing now so start our session
+                    if (Cseekbar.getProgress() >= 1) {
+                        try {
+                            Synch.mutex_music_state.acquire();
+                            Synch.music_state = MUSIC_ON;
+                            Synch.mutex_music_state.release();
+                        } catch (Exception e) {}
+                        Thread sessionupdatethread = new Thread(SessionUpdate);
+                        sessionupdatethread.start();
+                        musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_pause));
+                        Synch.session.release(); // Release our music semaphore so the session can start
 
+                        try {
+                            Synch.mutex_statistics.acquire();
+                            Synch.dateTimeStarted.add(LocalDateTime.now());
+                            Synch.mutex_statistics.release();
+                        } catch (Exception e) {
+                        }
+
+                        // If it's not playing
+                        if (!mp2.isPlaying()) {
+                            // Resume the music player
+                            mp2.start();
+                        }
+                    }
                 } else { // Music is on pause
-                    sessionEnded();
+                    System.out.println("test");
+                    sessionEnded(true);
+                    try {
+                        Synch.mutex_music_state.acquire();
+                        Synch.music_state = MUSIC_OFF;
+                        Synch.mutex_music_state.release();
+                    } catch (Exception e) {}
+                    musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_play));
+
+                    // If the music is playing
+                    if(mp2.isPlaying()) {
+                        // Pause the music player
+                        mp2.pause();
+                    }
                 }
             }
         });
@@ -320,15 +407,31 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 boolean result = checkVolumeArray(volumeArray);
-                if (result) {
-                    float avgVol = averageVolume(volumeArray);
-                    addPastData(avgVol, time_listened);
-                }
-                sessionEnded();
+                System.out.println("Check Reset");
+//                if (result) {
+//                    float avgVol = averageVolume(volumeArray);
+//                    addPastData(avgVol, time_listened);
+//                }
+                sessionEnded(false);
                 // This allows us to only change the seekbar progress without changing the volume
                 reset_crutch = true;
                 Cseekbar.setProgress(0);
+                Cseekbar.setIsTouchEnabled(true);
                 reset_crutch = false;
+
+                try {
+                    Synch.mutex_music_state.acquire();
+                    Synch.music_state = MUSIC_OFF;
+                    Synch.mutex_music_state.release();
+                    Synch.mutex_session_active.acquire();
+                    Synch.session_active = false;
+                    Synch.mutex_session_active.release();
+                } catch (Exception e) {}
+
+                if (mp2.isPlaying()) {
+                    musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_play));
+                    mp2.pause();
+                }
             }
         });
 
@@ -345,8 +448,10 @@ public class MainActivity extends AppCompatActivity {
                         int newProgress = progress;
                         if (progress+RATIO <= 100) {
                             newProgress += RATIO;
+                        } else {
+                            newProgress = 100;
                         }
-                        seekBar.setProgress(newProgress,true);
+                        seekBar.setProgress(newProgress, true);
                     }
                 }
                 Cseekbar.setProgress(progress);
@@ -354,17 +459,24 @@ public class MainActivity extends AppCompatActivity {
                 checkProgressCircle(progress, circularSeekBar); // Get the progress of the circle
             }
 
-            public void onStartTrackingTouch(CircularSeekBar CirclularseekBar) {
+            public void onStartTrackingTouch(CircularSeekBar CirclularseekBar) { }
 
-            }
+            // To reset back to max if it's above
+            // Add to onStopTrackingTouch in seekbar listener if RATIO is negative
+            // circProgress-RATIO and seekProgress+RATIO (opposite to what is there now)
             public void onStopTrackingTouch(CircularSeekBar CirclularseekBar) {
-
+                int seekProgress = seekBar.getProgress();
+                if (seekProgress == 100 && Synch.seekbar_lock && !reset_crutch && !Synch.session_active) {
+                    Cseekbar.setProgress(seekProgress-RATIO);
+                }
             }
         });
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0);
+
                 // Check to see if the two seek bars are tied together
                 if (Synch.seekbar_lock && !reset_crutch) {
                     // Check if a session is active
@@ -373,8 +485,10 @@ public class MainActivity extends AppCompatActivity {
                         int newProgress = progress;
                         if (progress-RATIO >= 0) {
                             newProgress -= RATIO;
+                        } else {
+                            newProgress = 0;
                         }
-                        Cseekbar.setProgress((newProgress));
+                        Cseekbar.setProgress(newProgress);
                     }
                 }
                 seekBar.setProgress(progress);
@@ -404,25 +518,22 @@ public class MainActivity extends AppCompatActivity {
         // Necessary to clear first if we save preferences onPause.
         editor.clear();
         editor.putInt("CSeekBarProgress", Cseekbar.getProgress());
-        editor.putInt("SeekbarProgress", seekBar.getProgress());
-        editor.putBoolean("MusicState", music_state);
-        editor.commit();
+        editor.putInt("SeekBarProgress", seekBar.getProgress());
+
+        editor.apply();
 
     }
 
     @Override
     public void onStart() {
         super.onStart();
-
 //        Cseekbar.setProgress(0);
 //        seekBar.setProgress(0);
-        music_state = false;
-        musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_play));
-        try {
-            Synch.mutex_session_active.acquire();
-            Synch.session_active = false;
-            Synch.mutex_session_active.release();
-        } catch (Exception e) {}
+//        try {
+//            Synch.mutex_session_active.acquire();
+//            Synch.session_active = false;
+//            Synch.mutex_session_active.release();
+//        } catch (Exception e) {}
     }
 
     @Override
@@ -434,22 +545,31 @@ public class MainActivity extends AppCompatActivity {
 
         int CSeekBarProgress = sharedPref.getInt("CSeekBarProgress", 0);
         int SeekBarProgress = sharedPref.getInt("SeekBarProgress", 0);
-        music_state = sharedPref.getBoolean("MusicState", false);
 
-        Cseekbar.setProgress(CSeekBarProgress);
+        int progress = CSeekBarProgress;
+
+        if (Synch.session_active) {
+            try {
+                Synch.mutex_background_counters.acquire();
+                progress = Synch.timeProgress;
+                Synch.mutex_background_counters.release();
+            } catch (Exception e) {}
+        } else {
+            progress = CSeekBarProgress;
+        }
+
+        System.out.println(progress + " - " + SeekBarProgress);
+        Cseekbar.setProgress(progress);
+        setTimeText(progress);
         seekBar.setProgress(SeekBarProgress);
-        textViewvolumeProgress.setText("" + SeekBarProgress + "%");
-        setTimeText(CSeekBarProgress);
+        textViewvolumeProgress.setText("" + SeekBarProgress + "%");;
 
-        if (music_state) { // Music is playing now so start our session
+        if (Synch.music_state == MUSIC_ON) { // Music is playing now so start our session
             musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_pause));
+            Cseekbar.setIsTouchEnabled(false);
         } else { // Music is on pause
             musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_play));
-            try {
-                Synch.mutex_session_active.acquire();
-                Synch.session_active = false;
-                Synch.mutex_session_active.release();
-            } catch (Exception e) {}
+            Cseekbar.setIsTouchEnabled(true);
         }
     }
 
@@ -463,6 +583,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
 
+            Cseekbar.setIsTouchEnabled(false);
             try {
                 Synch.session_update.acquire();
             } catch (Exception e) {}
@@ -499,6 +620,11 @@ public class MainActivity extends AppCompatActivity {
                             if (s_active) {
                                 // 1% of 12 hours = 7.2 minutes
                                 progress = progress - 1;
+                                try {
+                                    Synch.mutex_background_counters.acquire();
+                                    Synch.timeProgress = progress;
+                                    Synch.mutex_background_counters.release();
+                                } catch (Exception e) {}
                                 Cseekbar.setProgress(progress);
                                 Cseekbar.setEnabled(false);
 
@@ -514,8 +640,8 @@ public class MainActivity extends AppCompatActivity {
                             if (progress == 0) {
                                 session.sendNotification("Session Ended",
                                         "Time up! Turn off your music to prevent damage!");
-                                sessionEnded();
-                            } else if (progress <= 2) {
+                                sessionEnded(false);
+                            } else if (progress <= 2 && switchNote) {
                                 session.sendNotification("Session Almost Done",
                                         "Less than 15 minutes left in the current session!");
                             }
