@@ -25,6 +25,7 @@ To start a session, set a time and/or volume and play your music. A notification
 Made by: Sean Remedios, Taylor Simpson, Ann Fernandes, Monica Rao, Krysta Peralto and Joseph Kachura for CISC 325
 
 ## License
+```
  Copyright 2018 Sean Remedios
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,3 +39,4 @@ Made by: Sean Remedios, Taylor Simpson, Ann Fernandes, Monica Rao, Krysta Peralt
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 	either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
+```
