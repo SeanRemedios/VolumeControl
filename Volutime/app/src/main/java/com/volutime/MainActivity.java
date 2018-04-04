@@ -442,13 +442,24 @@ public class MainActivity extends AppCompatActivity {
                     // Check if a session is active
                     if (!Synch.session_active) {
                         // Make sure the ratio is not above our max
-                        int newProgress = progress;
-                        if (progress+RATIO <= 100) {
-                            newProgress += RATIO;
-                        } else {
-                            newProgress = 100;
-                        }
+                        int newProgress = Math.abs(100 - progress);
+
+//                        if (progress <= 50) {
+//                            if (progress-RATIO <= 0) {
+//                                newProgress = 0;
+//                            } else {
+//                                newProgress -= RATIO;
+//                            }
+//                        } else {
+//                            if (progress+RATIO <= 100) {
+//                                newProgress += RATIO;
+//                            } else {
+//                                newProgress = 100;
+//                            }
+//                        }
+
                         seekBar.setProgress(newProgress, true);
+                        textViewvolumeProgress.setText(newProgress + "%");
                     }
                 }
                 Cseekbar.setProgress(progress);
@@ -462,10 +473,10 @@ public class MainActivity extends AppCompatActivity {
             // Add to onStopTrackingTouch in seekbar listener if RATIO is negative
             // circProgress-RATIO and seekProgress+RATIO (opposite to what is there now)
             public void onStopTrackingTouch(CircularSeekBar CirclularseekBar) {
-                int seekProgress = seekBar.getProgress();
-                if (seekProgress == 100 && Synch.seekbar_lock && !reset_crutch && !Synch.session_active) {
-                    Cseekbar.setProgress(seekProgress-RATIO);
-                }
+//                int seekProgress = seekBar.getProgress();
+//                if (seekProgress == 100 && Synch.seekbar_lock && !reset_crutch && !Synch.session_active) {
+//                    Cseekbar.setProgress(seekProgress-RATIO);
+//                }
             }
         });
 
@@ -479,13 +490,24 @@ public class MainActivity extends AppCompatActivity {
                     // Check if a session is active
                     if (!Synch.session_active) {
                         // Make sure the ratio is not above our max
-                        int newProgress = progress;
-                        if (progress-RATIO >= 0) {
-                            newProgress -= RATIO;
-                        } else {
-                            newProgress = 0;
-                        }
+                        int newProgress = Math.abs(100 - progress);
+
+//                        if (progress <= 50) {
+//                            if (progress+RATIO <= 100) {
+//                                newProgress += RATIO;
+//                            } else {
+//                                newProgress = 100;
+//                            }
+//                        } else {
+//                            if (progress-RATIO >= 0) {
+//                                newProgress -= RATIO;
+//                            } else {
+//                                newProgress = 0;
+//                            }
+//                        }
+
                         Cseekbar.setProgress(newProgress);
+                        setTimeText(newProgress);
                     }
                 }
                 seekBar.setProgress(progress);
