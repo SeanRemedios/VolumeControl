@@ -120,16 +120,16 @@ public class StatsActivity extends AppCompatActivity {
         graph.getViewport().setScrollableY(true); // enables vertical scrolling
         graph.getViewport().setScalableY(true); // enables vertical zooming and scrolling
 
-        String[] dataDate = {   " Date: 03/04/2018 - ",
-                                " Date: 24/03/2018 - ",
-                                " Date: 13/03/2018 - ",
-                                " Date: 09/01/2018 - ",
+        String[] dataDate = {   " Date: 09/01/2018 - ",
+                                " Date: 19/01/2018 - ",
                                 " Date: 14/02/2018 - ",
                                 " Date: 17/02/2018 - ",
+                                " Date: 21/02/2018 - ",
+                                " Date: 13/03/2018 - ",
+                                " Date: 24/03/2018 - ",
                                 " Date: 26/03/2018 - ",
-                                " Date: 19/01/2018 - ",
                                 " Date: 30/03/2018 - ",
-                                " Date: 21/02/2018 - " };
+                                " Date: 03/04/2018 - " };
 
         String[] dataVol = {    "Avg Volume: 50%",
                                 "Avg Volume: 35%",
@@ -164,7 +164,7 @@ public class StatsActivity extends AppCompatActivity {
                                 "Duration: 2.5 hours",
                                 "Duration: 2.25 hours" };
 
-        for (int i=0;i< dataDate.length;i++) {
+        for (int i=dataDate.length-1; i >= 0; i--) {
             TextView datetime = new TextView(this);
             TextView voldur = new TextView(this);
 

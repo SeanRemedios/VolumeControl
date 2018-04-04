@@ -13,18 +13,22 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 public class ProfileActivity extends AppCompatActivity  {
 
-    Toolbar topToolBar;
+    private Toolbar topToolBar;
     private ImageButton settingsButton;
     private Button setPrefsButton;
     private EditText volumeEdit;
     private EditText timeEdit;
-    BottomNavigationView navigation;
-    public boolean HeadphoneType = true;
+    private BottomNavigationView navigation;
+    private RadioGroup radiogroup;
+
+    private final String HEADPHONE_TYPE_1 = "Earbud";
+    private final String HEADPHONE_TYPE_2 = "OverEar";
+    public String headphone_type;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -78,6 +82,7 @@ public class ProfileActivity extends AppCompatActivity  {
         settingsButton = (ImageButton) findViewById(R.id.settings_button);
         navigation = (BottomNavigationView) findViewById(R.id.navigation);
         topToolBar = (Toolbar) findViewById(R.id.toolbar);
+        radiogroup = (RadioGroup) findViewById(R.id.RG_HeadphoneType);
 
         toolbarStuff();
         navigationStuff();
@@ -89,6 +94,21 @@ public class ProfileActivity extends AppCompatActivity  {
                 i.putExtra("FromClass", "Profile");
                 startActivity(i);
                 finish();
+            }
+        });
+
+        radiogroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                switch(checkedId) {
+                    case R.id.RB_Earbud:
+                        headphone_type = HEADPHONE_TYPE_1;
+                        break;
+                    case R.id.RB_OTE:
+                        headphone_type = HEADPHONE_TYPE_2;
+                        break;
+                }
             }
         });
 
@@ -110,6 +130,13 @@ public class ProfileActivity extends AppCompatActivity  {
                     volumeInt = Integer.parseInt(volumeEdit.getText().toString());
                     timeDoub = Double.parseDouble(timeEdit.getText().toString());
                     timeInt = convertToPercent(timeDoub);
+                    if (volumeInt >= 100 || timeInt >= 100) {
+                        volumeEdit.setText("100");
+                        int temp = 100 - MainActivity.RATIO;
+                        timeEdit.setText(temp + "");
+                        volumeInt = 100;
+                        timeInt = temp;
+                    }
                 } catch(NumberFormatException nfe) {
                     System.out.println("Could not parse " + nfe);
                 }
@@ -131,22 +158,6 @@ public class ProfileActivity extends AppCompatActivity  {
         int timeINT = 0;
         timeINT = (int)((time/12)*100);
         return timeINT;
-    }
-
-    public void onRadioButtonClicked(View view) {
-        // Is the button now checked?
-        boolean checked = ((RadioButton) view).isChecked();
-        // Check which radio button was clicked
-        switch(view.getId()) {
-            case R.id.RB_Earbud:
-                if (checked)
-                    HeadphoneType = true;
-                break;
-            case R.id.RB_OTE:
-                if (checked)
-                    HeadphoneType = false;
-                break;
-        }
     }
 
     private void setTimeText(int progress) {

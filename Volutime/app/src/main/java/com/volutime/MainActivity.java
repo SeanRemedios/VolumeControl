@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean reset_crutch = false;
     private int time_listened = 0;
     private int[] volumeArray = new int[100]; // Max we can have
-    private final int RATIO = 30; // ratio of volume to time
+    public static final int RATIO = 30; // ratio of volume to time
 
     private static MediaPlayer mp2 = null;
 
@@ -89,16 +89,13 @@ public class MainActivity extends AppCompatActivity {
             switch (item.getItemId()) {
                 // Tab on the left
                 case R.id.navigation_profile:
-//                    mTextMessage.setText("Profile");
                     launchActivity(ProfileActivity.class); // Launch the tab's activity
                     return true;
                 // Tab in the middle
                 case R.id.navigation_time: // This is current, do nothing
-//                    mTextMessage.setText("Time");
                     return true;
                 // Tab on the right
                 case R.id.navigation_stats:
-//                    mTextMessage.setText("Statistics");
                     launchActivity(StatsActivity.class); // Launch the tab's activity
                     return true;
             }
