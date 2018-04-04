@@ -142,6 +142,8 @@ public class MainActivity extends AppCompatActivity {
         // Set up the tool bar as an action bar
         setSupportActionBar(topToolBar);
         ActionBar actionBar = getSupportActionBar();
+        assert actionBar != null;
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
         actionBar.setDisplayHomeAsUpEnabled(true); // This is the back button in the top left
 
     }

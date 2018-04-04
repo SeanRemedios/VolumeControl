@@ -17,6 +17,16 @@
         android:minHeight="?attr/actionBarSize"
         android:theme="@style/Theme.Reset" >
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:layout_gravity="center"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorText"
+            android:id="@+id/toolbar_title" />
+
         <LinearLayout
             android:id="@+id/toolbarLayout"
             android:layout_width="wrap_content"
@@ -141,7 +151,9 @@
         android:id="@+id/setVolTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/Label1">
+        android:layout_below="@+id/Label1"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp">
         <LinearLayout
             android:id="@+id/volumeLayout"
             android:layout_width="match_parent"

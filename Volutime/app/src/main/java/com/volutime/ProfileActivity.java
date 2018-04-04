@@ -18,7 +18,6 @@ import android.widget.TextView;
 
 public class ProfileActivity extends AppCompatActivity  {
 
-//    private TextView mTextMessage;
     Toolbar topToolBar;
     private ImageButton settingsButton;
     private Button setPrefsButton;
@@ -62,7 +61,9 @@ public class ProfileActivity extends AppCompatActivity  {
         // Top toolbar
         setSupportActionBar(topToolBar);
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
+        assert actionBar != null;
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        actionBar.setDisplayHomeAsUpEnabled(false);
     }
 
 

@@ -24,7 +24,7 @@ public class SettingActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 Bundle extras = getIntent().getExtras();
-                if(extras !=null) {
+                if(extras != null) {
                     String fromClass = extras.getString("FromClass");
                     switch (fromClass) {
                         case "Main":
@@ -44,6 +44,4 @@ public class SettingActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
-
 }

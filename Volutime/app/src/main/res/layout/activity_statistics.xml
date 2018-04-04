@@ -17,6 +17,16 @@
         android:minHeight="?attr/actionBarSize"
         android:theme="@style/Theme.Reset" >
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:layout_gravity="center"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorText"
+            android:id="@+id/toolbar_title" />
+
         <LinearLayout
             android:id="@+id/toolbarLayout"
             android:layout_width="wrap_content"
@@ -38,6 +48,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
+        android:id="@+id/viewtoolbar"
         android:layout_below="@+id/toolbar"
         android:background="@color/colorBlack">
     </View>
@@ -64,14 +75,40 @@
         app:layout_constraintRight_toRightOf="parent"
         app:menu="@menu/navigation" />
 
-    <!--<TextView-->
-        <!--android:id="@+id/message"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_marginTop="65dp"-->
-        <!--android:text="@string/title_stats"-->
-        <!--android:textColor="@color/colorText"-->
-        <!--app:layout_constraintLeft_toLeftOf="parent"-->
-        <!--app:layout_constraintTop_toTopOf="parent" />-->
+    <com.jjoe64.graphview.helper.GraphViewXML
+        android:layout_width="match_parent"
+        android:layout_height="200dip"
+        android:id="@+id/graph"
+        android:layout_below="@id/viewtoolbar"
+        android:background="@color/colorBackground"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:layout_marginEnd="2dp"
+        app:seriesData="1=50;2=35;3.5=40;8=45;6=17;6=40;4=65;3=80;2.5=70;4.25=50"
+        app:seriesType="points"
+        app:seriesColor="#ee0000"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:id="@+id/viewgraph"
+        android:layout_below="@+id/graph"
+        android:background="@color/colorBlack">
+    </View>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/viewgraph"
+        android:id="@+id/scroll">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/dataLL"
+            android:orientation="vertical"
+            android:paddingBottom="50dp"
+            android:paddingTop="5dp">
+        </LinearLayout>
+    </ScrollView>
 
 </RelativeLayout>
