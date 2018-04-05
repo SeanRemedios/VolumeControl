@@ -26,6 +26,7 @@ import com.devadvance.circularseekbar.CircularSeekBar;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.concurrent.Semaphore;
 
 public class MainActivity extends AppCompatActivity {
@@ -56,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
     public static final int RATIO = 40; // ratio of volume to time
 
     private static MediaPlayer mp2 = null;
+
+    private int[] songs = {R.raw.smokeotw_dp, R.raw.bohemianrhap_queen, R.raw.mansnothot_bigshaq};
 
     // This is for our thread stuff to make sure they don't get created again later
     public MainActivity() {
@@ -312,7 +315,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Music
         if (mp2 == null) {
-            mp2 = MediaPlayer.create(MainActivity.this, R.raw.u_rite_they);
+            Random rand = new Random();
+            int randSong = rand.nextInt(songs.length);
+            mp2 = MediaPlayer.create(MainActivity.this, songs[randSong]);
             mp2.setLooping(true);
         }
         final AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
