@@ -294,6 +294,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
         BottomNavigationView navigation;
         ImageButton settingsButton;
 
@@ -539,25 +541,25 @@ public class MainActivity extends AppCompatActivity {
         // if one of the volume keys were pressed
         if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
             // change the seek bar progress indicator position
-            changeSeekbarValue();
+            changeSeekbarValue(-1);
         } else if(keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             // change the seek bar progress indicator position
-            changeSeekbarValue();
+            changeSeekbarValue(1);
         }
         // propagate the key event
         return super.onKeyDown(keyCode, event);
     }
 
-    public void changeSeekbarValue() {
-        AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        assert audio != null;
-        int currentVolume = audio.getStreamVolume(AudioManager.STREAM_MUSIC);
-        int maxVolume = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+    public void changeSeekbarValue(int change) {
+//        AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+//        assert audio != null;
+//        int currentVolume = audio.getStreamVolume(AudioManager.STREAM_MUSIC);
+//        int maxVolume = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+//
+//        int vol = (int) (((double)currentVolume/maxVolume) * 100);
 
-        int vol = (int) (((double)currentVolume/maxVolume) * 100);
-
-        seekBar.setProgress(vol, true);
-        textViewvolumeProgress.setText(vol + "%");
+        seekBar.setProgress(seekBar.getProgress()+change, true);
+        textViewvolumeProgress.setText((seekBar.getProgress()+change) + "%");
     }
 
 
