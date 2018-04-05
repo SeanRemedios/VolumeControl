@@ -18,5 +18,17 @@
         android:key="Switch_Note"
         android:summary="Enable for mid-session warnings (15 minutes remaining)"
         android:title="Notifications" />
+    <Preference
+        android:editable="false"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:summary="The Volutime app lets users adjust their volume and time for a session to ensure the user's ears are not damaged."
+        android:title="About" />
+    <Preference
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:summary="Sean Remedios, Taylor Simpson, Monica Rao, Ann Fernandes, Joseph Kachura, Krysta Peralto \nCopyright 2018"
+        android:title="Developed By"
+        />
 
 </PreferenceScreen>

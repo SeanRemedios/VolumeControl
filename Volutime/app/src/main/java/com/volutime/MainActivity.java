@@ -386,7 +386,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 } else { // Music is on pause
-                    System.out.println("test");
                     sessionEnded(true);
                     try {
                         Synch.mutex_music_state.acquire();
