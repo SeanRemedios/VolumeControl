@@ -203,6 +203,6 @@ public class StatsActivity extends AppCompatActivity {
             // Synch.times_listened;
             // Synch.dateTimeStarted;
             Synch.mutex_statistics.release();
-        } catch (Exception e) {}
+        } catch (Exception ignored) {}
     }
 }

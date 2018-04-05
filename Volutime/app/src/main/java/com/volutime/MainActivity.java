@@ -15,6 +15,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
@@ -36,9 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar seekBar;
     private CircularSeekBar Cseekbar;
     private Toolbar topToolBar;
-    private ImageButton settingsButton;
     private ImageButton musicButton;
-    private BottomNavigationView navigation;
     private boolean switchNote = true;
     private boolean switchCB = false;
 
@@ -52,9 +51,9 @@ public class MainActivity extends AppCompatActivity {
 
     // To allow us to reset and not change both bars - lazy and stupid, will change later
     private boolean reset_crutch = false;
-    private int time_listened = 0;
+//    private int time_listened = 0;
     private int[] volumeArray = new int[100]; // Max we can have
-    public static final int RATIO = 30; // ratio of volume to time
+    public static final int RATIO = 40; // ratio of volume to time
 
     private static MediaPlayer mp2 = null;
 
@@ -158,13 +157,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkProgressCircle(int progress, CircularSeekBar circularSeekBar) {
-       int seekbarProgress = seekBar.getProgress();
+//       int seekbarProgress = seekBar.getProgress();
 
-        if (progress > 70 && progress < 90 && Synch.seekbar_lock && !Synch.session_active) {
+        if (progress > 68 && progress < 88 && Synch.seekbar_lock && !Synch.session_active) {
             // Just a warning since listening to music for a long time is dangerous at any level
             changeCircSeekBarColor(R.color.colorOrange, circularSeekBar);
         // Eventually will change to properly check when it's at a dangerous level
-        } else if (progress-RATIO >= seekbarProgress || progress > 70) {
+        } else if (progress < 32 || progress > 68) {
             changeCircSeekBarColor(R.color.colorRed, circularSeekBar);
         } else {
             int id;
@@ -178,13 +177,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkProgressSeekbar(int progress, SeekBar seekBar) {
-        int cSeekBarProgress = Cseekbar.getProgress();
+//        int cSeekBarProgress = Cseekbar.getProgress();
 
         // It's dangerous if the volume is above 80%
-        if (progress > 80) {
-            changeSeekBarColor(cslAbove);
-        // Eventually will change to properly check when it's at a dangerous level
-        } else if (progress-RATIO > cSeekBarProgress) {
+        if (progress > 68 || progress < 32) {
             changeSeekBarColor(cslAbove);
         } else {
             if (switchCB) {
@@ -246,19 +242,19 @@ public class MainActivity extends AppCompatActivity {
         cslBelowCB = new ColorStateList(states, colorsBelowCB);
     }
 
-    private float averageVolume(int[] volumeArray) {
-        int sum = 0;
-        float avgVol = 0;
-        int i;
-        for (i = 0; i < volumeArray.length; i++) {
-            if (volumeArray[i] == -1) {
-                break;
-            }
-            sum += volumeArray[i];
-        }
-        avgVol = sum/i;
-        return avgVol;
-    }
+//    private float averageVolume(int[] volumeArray) {
+//        int sum = 0;
+//        float avgVol = 0;
+//        int i;
+//        for (i = 0; i < volumeArray.length; i++) {
+//            if (volumeArray[i] == -1) {
+//                break;
+//            }
+//            sum += volumeArray[i];
+//        }
+//        avgVol = sum/i;
+//        return avgVol;
+//    }
 
     private boolean checkVolumeArray(int[] volumeArray) {
         boolean result = false;
@@ -271,14 +267,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void addPastData(float volume, int time_listened) {
-        try {
-            Synch.mutex_statistics.acquire();
-            Synch.volumes.add(volume);
-            Synch.times_listened.add(time_listened);
-            Synch.mutex_statistics.release();
-        } catch (Exception e) {}
-    }
+//    private void addPastData(float volume, int time_listened) {
+//        try {
+//            Synch.mutex_statistics.acquire();
+//            Synch.volumes.add(volume);
+//            Synch.times_listened.add(time_listened);
+//            Synch.mutex_statistics.release();
+//        } catch (Exception e) {}
+//    }
 
     private void sessionEnded(boolean pause) {
 //        musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_play));
@@ -286,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
             Synch.mutex_session_active.acquire();
             Synch.session_active = false;
             Synch.mutex_session_active.release();
-        } catch (Exception e) {}
+        } catch (Exception ignored) {}
         Arrays.fill(volumeArray, -1);
         if (pause) {
             Cseekbar.setIsTouchEnabled(true);
@@ -297,6 +293,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        BottomNavigationView navigation;
+        ImageButton settingsButton;
 
         // Get all IDs from activity
         // Don't need to cast, just do it for info
@@ -334,7 +333,7 @@ public class MainActivity extends AppCompatActivity {
             Synch.mutex_seekbar_lock.acquire();
             Synch.seekbar_lock = switchPref;
             Synch.mutex_seekbar_lock.release();
-        } catch (Exception e) {}
+        } catch (Exception ignored) {}
         //Toast.makeText(this, switchPref.toString(), Toast.LENGTH_SHORT).show();
         switchNote = sharedPref.getBoolean(SettingActivity.KEY_PREF_NOTE_SWITCH, true);
         switchCB = sharedPref.getBoolean(SettingActivity.KEY_PREF_CB_SWITCH, false);
@@ -361,7 +360,7 @@ public class MainActivity extends AppCompatActivity {
                             Synch.mutex_music_state.acquire();
                             Synch.music_state = MUSIC_ON;
                             Synch.mutex_music_state.release();
-                        } catch (Exception e) {}
+                        } catch (Exception ignored) {}
                         Thread sessionupdatethread = new Thread(SessionUpdate);
                         sessionupdatethread.start();
                         musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_pause));
@@ -371,8 +370,7 @@ public class MainActivity extends AppCompatActivity {
                             Synch.mutex_statistics.acquire();
                             Synch.dateTimeStarted.add(LocalDateTime.now());
                             Synch.mutex_statistics.release();
-                        } catch (Exception e) {
-                        }
+                        } catch (Exception ignored) {}
 
                         // If it's not playing
                         if (!mp2.isPlaying()) {
@@ -387,7 +385,7 @@ public class MainActivity extends AppCompatActivity {
                         Synch.mutex_music_state.acquire();
                         Synch.music_state = MUSIC_OFF;
                         Synch.mutex_music_state.release();
-                    } catch (Exception e) {}
+                    } catch (Exception ignored) {}
                     musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_play));
 
                     // If the music is playing
@@ -403,7 +401,7 @@ public class MainActivity extends AppCompatActivity {
         topToolBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                boolean result = checkVolumeArray(volumeArray);
+//                boolean result = checkVolumeArray(volumeArray);
                 System.out.println("Check Reset");
 //                if (result) {
 //                    float avgVol = averageVolume(volumeArray);
@@ -423,7 +421,7 @@ public class MainActivity extends AppCompatActivity {
                     Synch.mutex_session_active.acquire();
                     Synch.session_active = false;
                     Synch.mutex_session_active.release();
-                } catch (Exception e) {}
+                } catch (Exception ignored) {}
 
                 if (mp2.isPlaying()) {
                     musicButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.ic_play));
@@ -483,7 +481,14 @@ public class MainActivity extends AppCompatActivity {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
-                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0);
+                AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                assert audio != null;
+                assert audioManager != null;
+                int maxVolume = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+                double vol = ((100.0*progress)/100.0)/100;
+                int streamVol = (int) (maxVolume*vol);
+                System.out.println(vol + " " + progress);
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, streamVol, 0);
 
                 // Check to see if the two seek bars are tied together
                 if (Synch.seekbar_lock && !reset_crutch) {
@@ -530,6 +535,33 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        // if one of the volume keys were pressed
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+            // change the seek bar progress indicator position
+            changeSeekbarValue();
+        } else if(keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+            // change the seek bar progress indicator position
+            changeSeekbarValue();
+        }
+        // propagate the key event
+        return super.onKeyDown(keyCode, event);
+    }
+
+    public void changeSeekbarValue() {
+        AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        assert audio != null;
+        int currentVolume = audio.getStreamVolume(AudioManager.STREAM_MUSIC);
+        int maxVolume = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+
+        int vol = (int) (((double)currentVolume/maxVolume) * 100);
+
+        seekBar.setProgress(vol, true);
+        textViewvolumeProgress.setText(vol + "%");
+    }
+
+
+    @Override
     public void onPause() {
         super.onPause();
         SharedPreferences settings = getSharedPreferences(getString(R.string.SharedPrefs_Time),0);
@@ -560,7 +592,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
 
         SharedPreferences sharedPref = this.getSharedPreferences(
-                getString(R.string.SharedPrefs_Time), this.MODE_PRIVATE);
+                getString(R.string.SharedPrefs_Time), MODE_PRIVATE);
 
         int CSeekBarProgress = sharedPref.getInt("CSeekBarProgress", 0);
         int SeekBarProgress = sharedPref.getInt("SeekBarProgress", 0);
@@ -572,7 +604,7 @@ public class MainActivity extends AppCompatActivity {
                 Synch.mutex_background_counters.acquire();
                 progress = Synch.timeProgress;
                 Synch.mutex_background_counters.release();
-            } catch (Exception e) {}
+            } catch (Exception ignored) {}
         } else {
             progress = CSeekBarProgress;
         }
@@ -605,7 +637,7 @@ public class MainActivity extends AppCompatActivity {
             Cseekbar.setIsTouchEnabled(false);
             try {
                 Synch.session_update.acquire();
-            } catch (Exception e) {}
+            } catch (Exception ignored) {}
 
             while (Synch.session_active) {
                 try {
@@ -621,7 +653,7 @@ public class MainActivity extends AppCompatActivity {
                     Synch.time.acquire(); // Already in a try, catch
 
                     // Add the time listened on every release
-                    time_listened += TimeKeeper.TIMEMAXWAIT;
+//                    time_listened += TimeKeeper.TIMEMAXWAIT;
                     // Get the volume and add it to the array to average it later
                     int volume = seekBar.getProgress();
                     volumeArray[count] = volume;
@@ -643,7 +675,7 @@ public class MainActivity extends AppCompatActivity {
                                     Synch.mutex_background_counters.acquire();
                                     Synch.timeProgress = progress;
                                     Synch.mutex_background_counters.release();
-                                } catch (Exception e) {}
+                                } catch (Exception ignored) {}
                                 Cseekbar.setProgress(progress);
                                 Cseekbar.setEnabled(false);
 
@@ -667,7 +699,7 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                     });
-                } catch (Exception e) {}
+                } catch (Exception ignored) {}
 
             }
         }

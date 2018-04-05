@@ -26,6 +26,7 @@ public class SettingActivity extends AppCompatActivity {
                 Bundle extras = getIntent().getExtras();
                 if(extras != null) {
                     String fromClass = extras.getString("FromClass");
+                    assert fromClass != null;
                     switch (fromClass) {
                         case "Main":
                             intent = new Intent(this, MainActivity.class);

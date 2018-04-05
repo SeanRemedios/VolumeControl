@@ -9,7 +9,7 @@ import android.graphics.Color;
 
 public class NotificationUtils {
 
-    Context context;
+    private Context context;
     private NotificationManager mManager;
     public static final String ANDROID_CHANNEL_ID = "com.volutime.ANDROID";
     public static final String ANDROID_CHANNEL_NAME = "ANDROID CHANNEL";

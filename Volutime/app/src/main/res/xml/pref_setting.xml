@@ -4,19 +4,19 @@
     <SwitchPreference
         android:defaultValue="true"
         android:key="Switch_L"
-        android:summary="Disable to show best settings when setting time or volume are linked"
+        android:summary="Enable to link a specific volume to a safe duration or vice versa"
         android:title="Link" />
     <SwitchPreference
         android:defaultValue="false"
         android:key="Switch_CB"
         android:summary="Enable mode to help distinguish between colours"
-        android:title="Colourblind" />
+        android:title="Colour Blind" />
     <SwitchPreference
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:defaultValue="true"
         android:key="Switch_Note"
-        android:summary="Enable to notify the user after the session is done"
+        android:summary="Enable for mid-session warnings (15 minutes remaining)"
         android:title="Notifications" />
 
 </PreferenceScreen>

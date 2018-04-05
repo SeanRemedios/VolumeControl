@@ -20,7 +20,7 @@ public class TimeKeeper extends Thread{
                     time = 1000; // Check every 1 second if there's a new session
                 }
 
-            } catch (Exception e) {}
+            } catch (Exception ignored) {}
         }
     }
 }

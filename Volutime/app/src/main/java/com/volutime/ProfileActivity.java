@@ -174,7 +174,7 @@ public class ProfileActivity extends AppCompatActivity  {
         super.onResume();
 
         SharedPreferences sharedPref = this.getSharedPreferences(
-                getString(R.string.SharedPrefs_Default), this.MODE_PRIVATE);
+                getString(R.string.SharedPrefs_Default), MODE_PRIVATE);
 
         int time_pref = sharedPref.getInt("CSeekBarProgress", 0);
         int volume_pref = sharedPref.getInt("SeekBarProgress", 0);
